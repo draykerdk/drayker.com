@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Drayker — open infrastructure through distributed collaboration</title>
+<meta name="description" content="Drayker is a volunteer, non-profit organization building Dk — a unified system of intelligence, organization and computing — and the protocol that lets the whole world build it together.">
+<meta name="theme-color" content="#08080A">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="canonical" href="https://drayker.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Drayker — open infrastructure through distributed collaboration">
+<meta property="og:description" content="A volunteer, non-profit organization building Dk and the protocol behind it.">
+<meta property="og:url" content="https://drayker.com/">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="noindex, nofollow">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#08080A;color:#EDECF0;font-family:'Space Grotesk',sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#FF5500;text-decoration:none}
+  a:hover{color:#FF7A33}
+  ::selection{background:#FF5500;color:#08080A}
+  .dk-glow{text-shadow:0 0 32px rgba(255,85,0,0.3),0 0 80px rgba(255,85,0,0.1)}
+  input,textarea,select,button{font-family:inherit}
+  button.dk-control{appearance:none;-webkit-appearance:none;margin:0;cursor:pointer}
+  button.dk-control:focus-visible{outline:2px solid #FF5500;outline-offset:3px}
+  button.dk-nav{background:transparent;border:0;color:inherit}
+  button.dk-footer-link{background:transparent;border:0;padding:0;text-align:left;color:#9898A8;font-size:13.5px}
+  button.dk-footer-link:hover{color:#FF5500}
+  /* dk-surf: slides the faint diagonal streak (gradient #dkog, inside the clipped .dk-surf group) sideways across
+     the sphere — a slow "moving light on a surface" texture. dk-breathe: very subtle idle scale pulse on the
+     whole mark (.dk-core) so it doesn't look frozen. Both are decorative only; the ring/shadow shapes are NOT
+     animated by CSS — they're redrawn every frame in JS, see "MARK PHYSICS" further down. */
+  @keyframes dk-surf{from{transform:translateX(0)}to{transform:translateX(74px)}}
+  @keyframes dk-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+  @keyframes dk-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .dk-surf{animation:dk-surf 9s linear infinite}
+  .dk-core{animation:dk-breathe 8s ease-in-out infinite;transform-box:view-box;transform-origin:0 0}
+  .dk-page{animation:dk-fade .34s ease both}
+  /* Header below ~820px: the mark and the actions share the first row, the section nav drops
+     to a full-width row of its own instead of wrapping into ragged lines beside them. The
+     component writes its layout inline, so these overrides have to be marked important. */
+  @media (max-width:820px){
+    .dk-head{gap:12px 14px!important}
+    .dk-head-nav{order:3!important;flex:0 0 100%!important;gap:18px!important;justify-content:flex-start!important;padding-top:2px}
+    .dk-head-actions{margin-left:auto}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+  }
+</style>
+</helmet>
+
+<div style="background:#08080A;min-height:100vh;display:flex;flex-direction:column">
+
+  <header style="position:sticky;top:0;z-index:50;background:rgba(11,11,12,0.9);backdrop-filter:blur(14px);border-bottom:1px solid #18181E">
+    <div class="dk-head" style="max-width:1320px;margin:0 auto;padding:13px clamp(16px,4vw,44px);display:flex;align-items:center;gap:clamp(14px,2.6vw,36px);flex-wrap:wrap">
+      <button type="button" class="dk-control" aria-label="Go to Drayker home" onClick="{{ goHome }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;background:transparent;border:0;color:#EDECF0;padding:0">
+<!-- Flat mark (header, small size): two static crossed ellipses = the ring (stroke #8585A0, greyscale to
+           match dkring above), solid circle = sphere body (fill #FF5500, keep in sync with dkball's base hue),
+           path below = fixed shadow wedge (fill #000000, keep in sync with dkdark). No JS, no gradients. -->
+<svg viewBox="-106 -106 212 212" width="30" height="30" style="display:block">
+          <ellipse cx="0" cy="0" rx="119" ry="38" transform="rotate(45)" fill="none" stroke="#8585A0" stroke-width="3.4"></ellipse>
+          <ellipse cx="0" cy="0" rx="119" ry="38" transform="rotate(-45)" fill="none" stroke="#8585A0" stroke-width="3.4"></ellipse>
+          <circle r="100" fill="#FF5500"></circle>
+          <path d="M -84.4 -53.7 A 119 38 45 0 0 0 51.2 A 119 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 51.2 A 119 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 119 38 -45 0 0 0 51.2 Z" fill="#000000"></path>
+
+        </svg>
+        <span style="font-size:17px;font-weight:600;letter-spacing:-0.02em">Drayker</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#6A6A80;letter-spacing:0.08em;padding-top:3px">{{ domain }}</span>
+      </button>
+
+      <nav class="dk-head-nav" style="display:flex;align-items:center;gap:clamp(9px,1.5vw,20px);flex-wrap:wrap;flex:1">
+        <sc-for list="{{ nav }}" as="item" hint-placeholder-count="7">
+          <button type="button" class="dk-control dk-nav" aria-current="{{ item.current }}" onClick="{{ item.onClick }}" style="font-size:13.5px;font-weight:500;cursor:pointer;padding:5px 0;border-bottom:1px solid transparent;white-space:nowrap;color:{{ item.color }};border-bottom-color:{{ item.line }}" style-hover="color:#EDECF0">{{ item.label }}</button>
+        </sc-for>
+      </nav>
+
+      <div class="dk-head-actions" style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <a href="{{ crossSiteUrl }}" aria-label="{{ switchAriaLabel }}" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:#65657A;background:transparent;border:1px solid #222230;padding:6px 10px" style-hover="border-color:#FF5500;color:#FF5500">{{ switchLabel }}</a>
+        <a href="{{ joinHref }}" style="background:#FF5500;color:#08080A;padding:9px 18px;font-size:13px;font-weight:600;box-shadow:0 0 16px rgba(255,85,0,0.2)" style-hover="background:#FF7A33;color:#08080A;box-shadow:0 0 24px rgba(255,85,0,0.35)">{{ joinLabel }}</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1">
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page" key="{{ pageKey }}">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,7vw,92px) clamp(16px,4vw,44px) clamp(34px,5vw,62px);display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(28px,5vw,72px);align-items:center">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">{{ heroKicker }}</div>
+          <h1 class="dk-glow" style="font-size:clamp(42px,6.2vw,88px);line-height:0.93;letter-spacing:-0.04em;font-weight:700;margin:0 0 26px;text-wrap:balance">{{ heroTitle }}</h1>
+          <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:52ch;margin:0 0 34px;text-wrap:pretty">{{ heroBody }}</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button type="button" class="dk-control" onClick="{{ heroPrimary }}" style="background:#FF5500;color:#08080A;border:0;padding:16px 30px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 0 24px rgba(255,85,0,0.25)" style-hover="background:#FF7A33;box-shadow:0 0 36px rgba(255,85,0,0.4)">{{ heroPrimaryLabel }}</button>
+            <button type="button" class="dk-control" onClick="{{ goManifesto }}" style="background:transparent;border:1px solid #2E2E38;color:#EDECF0;padding:16px 30px;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#FF5500;color:#FF5500">Read the manifesto</button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:center;padding:clamp(8px,3vw,36px)">
+<!-- ============================================================================
+     DRAYKER MARK — full 3D version (hero only). Structure, back to front:
+       1. circle r=138 fill=dkglow        -> soft halo/backdrop behind the sphere ("fundo do globo")
+       2. path ringBackRef                -> ring arcs that pass BEHIND the sphere (dim)
+       3. circle r=100 fill=dkball        -> the lit sphere body (base color)
+       4. clipped .dk-surf rect (dkog)    -> faint drifting streak/texture on the surface
+       5. path shadowRef  fill=dkdark     -> night-side shadow wedge (recomputed live, see JS)
+       6. path ringOverRef                -> ring arcs crossing IN FRONT of the sphere but inside its
+                                             silhouette (soft overlay, reads as "wrapping through" the ball)
+       7. path ringOutRef                 -> ring arcs in front of the sphere, outside its silhouette
+                                             (the normal, fully-visible ring color, gradient dkring)
+       8. circle r=100 stroke=dkrim       -> thin rim-light outline around the sphere edge
+     Header/footer use a FLAT 2-tone version instead (no gradients, no JS): two static crossed
+     ellipses (stroke only) + solid circle fill + one dark path for the shadow wedge — see the
+     comment near those <svg> blocks below for how to recolor them together with this one.
+     ============================================================================ -->
+<svg ref="{{ markRef }}" viewBox="-128 -128 256 256" style="width:100%;max-width:450px;height:auto;display:block">
+            <defs>
+              <!-- COLORS TO EDIT (each id = one gradient below):
+                     dkglow  backdrop glow color/spread behind the sphere ("fundo do globo") — edit the 3 stop-color hexes (opacity ramp can stay)
+                     dkball  sphere base color, light->dark ramp — THIS is the sphere's main hue
+                     dkdark  shadow/night-side overlay tint (keep near-black/neutral so it reads as shade, not a 2nd color)
+                     dkrim   rim-light stroke around the sphere edge (dark -> transparent -> warm highlight)
+                     dkring  metallic color of the crossing ring band (chrome grey by default)
+                     dkog    faint moving surface streak, usually leave near-white/low-opacity -->
+              <clipPath id="dkow" clipPathUnits="userSpaceOnUse"><circle r="100"></circle></clipPath>
+              <radialGradient id="dkglow" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="138">
+                <stop offset="0.5" stop-color="#FF5500" stop-opacity="0.17"></stop>
+                <stop offset="0.78" stop-color="#FF5500" stop-opacity="0.05"></stop>
+                <stop offset="1" stop-color="#FF5500" stop-opacity="0"></stop>
+              </radialGradient>
+              <radialGradient id="dkball" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="172">
+                <stop offset="0" stop-color="#FFB050"></stop>
+                <stop offset="0.26" stop-color="#FF7A10"></stop>
+                <stop offset="0.6" stop-color="#E05000"></stop>
+                <stop offset="0.88" stop-color="#B03800"></stop>
+                <stop offset="1" stop-color="#7A2600"></stop>
+              </radialGradient>
+              <radialGradient id="dkdark" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="182">
+                <stop offset="0" stop-color="#1B1B22"></stop>
+                <stop offset="0.42" stop-color="#0D0D12"></stop>
+                <stop offset="1" stop-color="#040406"></stop>
+              </radialGradient>
+              <radialGradient id="dkspec" gradientUnits="userSpaceOnUse" cx="-44" cy="-50" r="60">
+                <stop offset="0" stop-color="#FFF0E0" stop-opacity="0.42"></stop>
+                <stop offset="0.55" stop-color="#FFF0E0" stop-opacity="0.08"></stop>
+                <stop offset="1" stop-color="#FFF0E0" stop-opacity="0"></stop>
+              </radialGradient>
+              <linearGradient id="dkrim" gradientUnits="userSpaceOnUse" x1="-72" y1="-74" x2="76" y2="84">
+                <stop offset="0" stop-color="#000000" stop-opacity="0.4"></stop>
+                <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"></stop>
+                <stop offset="1" stop-color="#FFB070" stop-opacity="0.55"></stop>
+              </linearGradient>
+              <linearGradient id="dkring" gradientUnits="userSpaceOnUse" x1="-104" y1="-104" x2="104" y2="104">
+                <stop offset="0" stop-color="#E4E4F0"></stop>
+                <stop offset="0.45" stop-color="#9090A8"></stop>
+                <stop offset="1" stop-color="#444462"></stop>
+              </linearGradient>
+              <linearGradient id="dkog" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="74" y2="0" spreadMethod="repeat">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.11"></stop>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <g class="dk-core" style="transform-box:view-box;transform-origin:0 0">
+              <circle r="138" fill="url(#dkglow)"></circle>
+              <path ref="{{ ringBackRef }}" d="" fill="none" stroke="#32324A" stroke-width="2" stroke-linecap="round"></path>
+              <circle r="100" fill="url(#dkball)"></circle>
+              <g clip-path="url(#dkow)"><g class="dk-surf"><rect x="-260" y="-110" width="520" height="220" fill="url(#dkog)"></rect></g></g>
+              <path ref="{{ shadowRef }}" d="M -84.4 -53.7 A 118 38 45 0 0 0 50.7 A 118 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 50.7 A 118 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 118 38 -45 0 0 0 50.7 Z" fill="url(#dkdark)"></path>
+              <path ref="{{ ringOverRef }}" d="" fill="none" stroke="#FFE8D0" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round"></path>
+              <path ref="{{ ringOutRef }}" d="M 83.4 83.4 A 118 38 45 0 1 -83.4 -83.4 A 118 38 45 0 1 83.4 83.4 Z M -83.4 83.4 A 118 38 -45 0 1 83.4 -83.4 A 118 38 -45 0 1 -83.4 83.4 Z" fill="none" stroke="url(#dkring)" stroke-width="2.1" stroke-linecap="round"></path>
+              <circle r="100" fill="none" stroke="url(#dkrim)" stroke-width="1.6"></circle>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;border-bottom:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:0 clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+          <div style="padding:26px 24px 26px 0;border-right:1px solid #18181E">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5500;letter-spacing:0.14em;margin-bottom:8px">100% VOLUNTARY</div>
+            <div style="font-size:14px;color:#8585A0;line-height:1.55">Built entirely on volunteer effort and resources.</div>
+          </div>
+          <div style="padding:26px 24px;border-right:1px solid #18181E">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5500;letter-spacing:0.14em;margin-bottom:8px">NON-PROFIT</div>
+            <div style="font-size:14px;color:#8585A0;line-height:1.55">Resources governed by the DAF — a decentralized autonomous federation.</div>
+          </div>
+          <div style="padding:26px 24px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5500;letter-spacing:0.14em;margin-bottom:8px">OPEN SOURCE</div>
+            <div style="font-size:14px;color:#8585A0;line-height:1.55">Each project publishes its own source and license; read the repository before reuse.</div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,100px) clamp(16px,4vw,44px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:18px">Three layers</div>
+        <h2 style="font-size:clamp(30px,4vw,54px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:0 0 48px;max-width:24ch">One protocol, one kernel, one ecosystem.</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+          <button type="button" class="dk-control" onClick="{{ goDfm }}" style="background:#0C0C0F;color:#EDECF0;border:0;text-align:left;width:100%;padding:32px 28px 28px;cursor:pointer;display:flex;flex-direction:column;gap:12px;min-height:250px" style-hover="background:#111115">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80">01</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em">DFM Protocol</div>
+            <p style="font-size:15px;line-height:1.6;color:#8585A0;margin:0;flex:1">Model a problem, break it into small functions, distribute them worldwide through decentralized peer review.</p>
+            <div style="font-size:13px;color:#FF5500;font-weight:500">Open the protocol map →</div>
+          </button>
+          <button type="button" class="dk-control" onClick="{{ goDk }}" style="background:#0C0C0F;color:#EDECF0;border:0;text-align:left;width:100%;padding:32px 28px 28px;cursor:pointer;display:flex;flex-direction:column;gap:12px;min-height:250px" style-hover="background:#111115">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80">02</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em">Dk Global — the kernel</div>
+            <p style="font-size:15px;line-height:1.6;color:#8585A0;margin:0;flex:1">A unified intelligence, organization and computing system: DFM architecture, BSDK coordination, LCrypt security.</p>
+            <div style="font-size:13px;color:#FF5500;font-weight:500">Inside the kernel →</div>
+          </button>
+          <button type="button" class="dk-control" onClick="{{ goEco }}" style="background:#0C0C0F;color:#EDECF0;border:0;text-align:left;width:100%;padding:32px 28px 28px;cursor:pointer;display:flex;flex-direction:column;gap:12px;min-height:250px" style-hover="background:#111115">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80">03</div>
+            <div style="font-size:24px;font-weight:700;letter-spacing:-0.02em">The ecosystem</div>
+            <p style="font-size:15px;line-height:1.6;color:#8585A0;margin:0;flex:1">A parallel network, a universal identity, a federation without an owner — and everything the volunteers build on top.</p>
+            <div style="font-size:13px;color:#FF5500;font-weight:500">See all projects →</div>
+          </button>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(52px,8vw,116px) clamp(16px,4vw,44px)">
+          <p class="dk-glow" style="font-size:clamp(25px,3.6vw,48px);line-height:1.14;letter-spacing:-0.03em;font-weight:500;margin:0;max-width:30ch;text-wrap:pretty">Humanity has immense latent capacity. We exist to create the conditions — of organization and action — that unlock it.</p>
+          <button type="button" class="dk-control" onClick="{{ goManifesto }}" style="display:inline-block;margin-top:32px;background:transparent;border:0;border-bottom:1px solid #FF5500;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:#FF5500;cursor:pointer;padding:0 0 3px">THE MANIFESTO</button>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isManifesto }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,88px) clamp(16px,4vw,44px) clamp(28px,4vw,48px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Manifesto</div>
+        <h1 class="dk-glow" style="font-size:clamp(36px,5.6vw,78px);line-height:0.96;letter-spacing:-0.04em;font-weight:700;margin:0;max-width:20ch;text-wrap:balance">We can solve problems we believe are impossible.</h1>
+      </section>
+
+      <section style="border-top:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,78px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,78px)">
+          <div>
+            <p style="font-size:clamp(17px,1.4vw,21px);line-height:1.62;color:#D2D0D8;margin:0 0 24px;text-wrap:pretty">Drayker starts from a conviction: we can do more with less, evolve faster, and solve problems we have given up on.</p>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 20px;text-wrap:pretty">None of that is a question of talent or capital. It is a question of conditions — the conditions of organization and of action. Most human effort is lost in coordination: in hierarchies that filter information, in work that is never documented, in decisions nobody can trace, in problems too large for any single team to hold.</p>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0;text-wrap:pretty">Drayker exists to create those conditions — so civilization can build infrastructure, scale up, and act at a level it never could before.</p>
+          </div>
+          <div>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 20px;text-wrap:pretty">So we started with the method instead of the product. First a specification for collaboration — <strong style="color:#EDECF0;font-weight:500">DFM</strong> — which breaks any issue into small individual functions, so that thousands of strangers can work on one thing without a manager in the middle.</p>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 20px;text-wrap:pretty">Then the systems that method makes possible: a distributed kernel, a parallel network, a universal identity, a federation that manages resources without an owner.</p>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0;text-wrap:pretty">We develop human, collective and artificial intelligence to reach further and see further. We do this for people — for each person. The boundless evolution of humanity is the end; intelligence is the means.</p>
+          </div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,100px) clamp(16px,4vw,44px)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:38px">What we hold to</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+            <sc-for list="{{ principles }}" as="p" hint-placeholder-count="6">
+              <div style="background:#08080A;padding:30px 26px;display:flex;flex-direction:column;gap:10px;min-height:186px">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80">{{ p.n }}</div>
+                <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;line-height:1.2">{{ p.title }}</div>
+                <div style="font-size:14px;line-height:1.6;color:#8585A0">{{ p.body }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDfm }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,78px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,72px);align-items:center">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">DFM Protocol</div>
+          <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 26px;max-width:24ch;text-wrap:balance">{{ dfmTitleTop }}</h1>
+          <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:62ch;margin:0;text-wrap:pretty">{{ dfmLead }}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:clamp(6px,2vw,26px)">
+<!-- Same physics-driven mark as the hero (suffix "3" gradients), in liquid-metal silver. -->
+<svg ref="{{ markRef }}" viewBox="-128 -128 256 256" style="width:100%;max-width:300px;height:auto;display:block">
+            <defs>
+              <radialGradient id="dkglow3" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="138">
+                <stop offset="0.5" stop-color="#C7CBD6" stop-opacity="0.17"></stop>
+                <stop offset="0.78" stop-color="#C7CBD6" stop-opacity="0.05"></stop>
+                <stop offset="1" stop-color="#C7CBD6" stop-opacity="0"></stop>
+              </radialGradient>
+              <radialGradient id="dkball3" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="172">
+                <stop offset="0" stop-color="#F5F6FA"></stop>
+                <stop offset="0.26" stop-color="#D3D6E0"></stop>
+                <stop offset="0.6" stop-color="#9AA0AE"></stop>
+                <stop offset="0.88" stop-color="#4B4F5A"></stop>
+                <stop offset="1" stop-color="#202226"></stop>
+              </radialGradient>
+              <radialGradient id="dkdark3" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="182">
+                <stop offset="0" stop-color="#1B1B22"></stop>
+                <stop offset="0.42" stop-color="#0D0D12"></stop>
+                <stop offset="1" stop-color="#040406"></stop>
+              </radialGradient>
+              <linearGradient id="dkrim3" gradientUnits="userSpaceOnUse" x1="-72" y1="-74" x2="76" y2="84">
+                <stop offset="0" stop-color="#000000" stop-opacity="0.4"></stop>
+                <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"></stop>
+                <stop offset="1" stop-color="#EAF0FF" stop-opacity="0.55"></stop>
+              </linearGradient>
+              <linearGradient id="dkring3" gradientUnits="userSpaceOnUse" x1="-104" y1="-104" x2="104" y2="104">
+                <stop offset="0" stop-color="#E4E4F0"></stop>
+                <stop offset="0.45" stop-color="#9090A8"></stop>
+                <stop offset="1" stop-color="#444462"></stop>
+              </linearGradient>
+              <linearGradient id="dkog3" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="74" y2="0" spreadMethod="repeat">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.11"></stop>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+              </linearGradient>
+              <clipPath id="dkow3" clipPathUnits="userSpaceOnUse"><circle r="100"></circle></clipPath>
+            </defs>
+            <g class="dk-core" style="transform-box:view-box;transform-origin:0 0">
+              <circle r="138" fill="url(#dkglow3)"></circle>
+              <path ref="{{ ringBackRef }}" d="" fill="none" stroke="#32324A" stroke-width="2" stroke-linecap="round"></path>
+              <circle r="100" fill="url(#dkball3)"></circle>
+              <g clip-path="url(#dkow3)"><g class="dk-surf"><rect x="-260" y="-110" width="520" height="220" fill="url(#dkog3)"></rect></g></g>
+              <path ref="{{ shadowRef }}" d="M -84.4 -53.7 A 118 38 45 0 0 0 50.7 A 118 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 50.7 A 118 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 118 38 -45 0 0 0 50.7 Z" fill="url(#dkdark3)"></path>
+              <path ref="{{ ringOverRef }}" d="" fill="none" stroke="#FFE8D0" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round"></path>
+              <path ref="{{ ringOutRef }}" d="M 83.4 83.4 A 118 38 45 0 1 -83.4 -83.4 A 118 38 45 0 1 83.4 83.4 Z M -83.4 83.4 A 118 38 -45 0 1 83.4 -83.4 A 118 38 -45 0 1 -83.4 83.4 Z" fill="none" stroke="url(#dkring3)" stroke-width="2.1" stroke-linecap="round"></path>
+              <circle r="100" fill="none" stroke="url(#dkrim3)" stroke-width="1.6"></circle>
+            </g>
+          </svg>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;text-align:center">THE MARK, IN LIQUID SILVER</div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:0 clamp(16px,4vw,44px)">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));border-left:1px solid #18181E;border-right:1px solid #18181E">
+
+            <div style="border-right:1px solid #18181E">
+              <sc-for list="{{ dfmSteps }}" as="s" hint-placeholder-count="5">
+                <button type="button" class="dk-control" aria-pressed="{{ s.selected }}" onClick="{{ s.onClick }}" style="display:block;width:100%;text-align:left;background:{{ s.bg }};color:#EDECF0;border:0;border-bottom:1px solid #18181E;border-left:2px solid {{ s.mark }};padding:24px 26px;cursor:pointer" style-hover="background:#111115">
+                  <div style="display:flex;gap:16px;align-items:flex-start">
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80;padding-top:5px;flex-shrink:0">{{ s.n }}</div>
+                    <div>
+                      <div style="font-size:19px;font-weight:600;letter-spacing:-0.02em;margin-bottom:5px">{{ s.title }}</div>
+                      <div style="font-size:13px;color:#8585A0;line-height:1.5">{{ s.tag }}</div>
+                    </div>
+                  </div>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="padding:clamp(26px,4vw,50px);display:flex;flex-direction:column;gap:28px;background:#0C0C0F">
+              <div style="display:flex;justify-content:center;align-items:center;min-height:210px">
+                {{ dfmDiagram }}
+              </div>
+              <div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#FF5500;margin-bottom:14px">STEP {{ dfmN }} — {{ dfmTitle }}</div>
+                <p style="font-size:16px;line-height:1.68;color:#9898A8;margin:0 0 14px;text-wrap:pretty">{{ dfmBody }}</p>
+                <p style="font-size:14px;line-height:1.66;color:#65657A;margin:0;text-wrap:pretty">{{ dfmNote }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,70px)">
+        <div>
+          <h2 style="font-size:clamp(23px,2.8vw,36px);line-height:1.08;letter-spacing:-0.03em;font-weight:600;margin:0 0 18px">Self-assessed, validated, re-evaluated.</h2>
+          <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 16px;text-wrap:pretty">The protocol ensures that every paper is self-assessed, validated and re-evaluated. Validation walks alongside development — ideas are discussed with communities and councils, then shaped into a detailed, widely revised paper that passes through the DAOs and councils before adoption.</p>
+          <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0">All ideas, goals and purposes must be in line with Drayker.</p>
+        </div>
+        <div style="border-left:1px solid #18181E;padding-left:clamp(20px,3vw,40px)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#FF5500;margin-bottom:20px">DFMP — PROPOSAL PROCESS</div>
+          <p style="font-size:15px;line-height:1.66;color:#8585A0;margin:0 0 18px;text-wrap:pretty">A paper enters the DFMP process only after being presented, discussed and validated in the community issue threads. Once legitimated, it moves through the community review branch to master. Updates follow the paper's own validation branch — every decision is traceable.</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a href="https://github.com/draykerdk/dfmp" target="_blank" rel="noreferrer" style="font-size:13px;font-weight:500">DFMP-000 · the proposal process →</a>
+            <a href="https://dfmp.drayker.org" target="_blank" rel="noreferrer" style="font-size:13px;font-weight:500">dfmp.drayker.org →</a>
+          </div>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDk }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,86px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,72px);align-items:center">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#5CE02E;margin-bottom:22px">Dk Global · the distributed kernel</div>
+          <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 26px;max-width:26ch">Dk Global — intelligence, distributed.</h1>
+          <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:58ch;margin:0;text-wrap:pretty">{{ dkHeroBody }}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:clamp(6px,2vw,26px)">
+<!-- Same physics-driven mark as the hero (see mark comment + "MARK PHYSICS"/"GAZE ANIMATION" in the logic class),
+     recolored green and a bit smaller. Gradients are self-contained duplicates (suffixed "2") so this section
+     doesn't depend on the hero's <defs> existing \u2014 ring stays chrome grey (dkring2), only the ball/glow/rim go green. -->
+<svg ref="{{ markRef }}" viewBox="-128 -128 256 256" style="width:100%;max-width:300px;height:auto;display:block">
+            <defs>
+              <radialGradient id="dkglow2" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="138">
+                <stop offset="0.5" stop-color="#5CE02E" stop-opacity="0.17"></stop>
+                <stop offset="0.78" stop-color="#5CE02E" stop-opacity="0.05"></stop>
+                <stop offset="1" stop-color="#5CE02E" stop-opacity="0"></stop>
+              </radialGradient>
+              <radialGradient id="dkball2" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="172">
+                <stop offset="0" stop-color="#D4FFB0"></stop>
+                <stop offset="0.26" stop-color="#8CEC49"></stop>
+                <stop offset="0.6" stop-color="#5CE02E"></stop>
+                <stop offset="0.88" stop-color="#357E14"></stop>
+                <stop offset="1" stop-color="#204D0C"></stop>
+              </radialGradient>
+              <radialGradient id="dkdark2" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="182">
+                <stop offset="0" stop-color="#1B1B22"></stop>
+                <stop offset="0.42" stop-color="#0D0D12"></stop>
+                <stop offset="1" stop-color="#040406"></stop>
+              </radialGradient>
+              <linearGradient id="dkrim2" gradientUnits="userSpaceOnUse" x1="-72" y1="-74" x2="76" y2="84">
+                <stop offset="0" stop-color="#000000" stop-opacity="0.4"></stop>
+                <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"></stop>
+                <stop offset="1" stop-color="#DFFFC8" stop-opacity="0.55"></stop>
+              </linearGradient>
+              <linearGradient id="dkring2" gradientUnits="userSpaceOnUse" x1="-104" y1="-104" x2="104" y2="104">
+                <stop offset="0" stop-color="#E4E4F0"></stop>
+                <stop offset="0.45" stop-color="#9090A8"></stop>
+                <stop offset="1" stop-color="#444462"></stop>
+              </linearGradient>
+              <linearGradient id="dkog2" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="74" y2="0" spreadMethod="repeat">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.11"></stop>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+              </linearGradient>
+              <clipPath id="dkow2" clipPathUnits="userSpaceOnUse"><circle r="100"></circle></clipPath>
+            </defs>
+            <g class="dk-core" style="transform-box:view-box;transform-origin:0 0">
+              <circle r="138" fill="url(#dkglow2)"></circle>
+              <path ref="{{ ringBackRef }}" d="" fill="none" stroke="#32324A" stroke-width="2" stroke-linecap="round"></path>
+              <circle r="100" fill="url(#dkball2)"></circle>
+              <g clip-path="url(#dkow2)"><g class="dk-surf"><rect x="-260" y="-110" width="520" height="220" fill="url(#dkog2)"></rect></g></g>
+              <path ref="{{ shadowRef }}" d="M -84.4 -53.7 A 118 38 45 0 0 0 50.7 A 118 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 50.7 A 118 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 118 38 -45 0 0 0 50.7 Z" fill="url(#dkdark2)"></path>
+              <path ref="{{ ringOverRef }}" d="" fill="none" stroke="#FFE8D0" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round"></path>
+              <path ref="{{ ringOutRef }}" d="M 83.4 83.4 A 118 38 45 0 1 -83.4 -83.4 A 118 38 45 0 1 83.4 83.4 Z M -83.4 83.4 A 118 38 -45 0 1 83.4 -83.4 A 118 38 -45 0 1 -83.4 83.4 Z" fill="none" stroke="url(#dkring2)" stroke-width="2.1" stroke-linecap="round"></path>
+              <circle r="100" fill="none" stroke="url(#dkrim2)" stroke-width="1.6"></circle>
+            </g>
+          </svg>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;text-align:center">THE MARK, IN Dk GREEN</div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(36px,5vw,64px) clamp(16px,4vw,44px)">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+            <div style="background:#0C0C0F;padding:26px">
+              <div style="font-size:15px;font-weight:600;margin-bottom:6px">DFM architecture</div>
+              <div style="font-size:13px;color:#8585A0;line-height:1.55">Every capability is a function in a distributed topology.</div>
+            </div>
+            <div style="background:#0C0C0F;padding:26px">
+              <div style="font-size:15px;font-weight:600;margin-bottom:6px">BSDK structure</div>
+              <div style="font-size:13px;color:#8585A0;line-height:1.55">A base structure for integrating functions and modules inside the kernel.</div>
+            </div>
+            <div style="background:#0C0C0F;padding:26px">
+              <div style="font-size:15px;font-weight:600;margin-bottom:6px">LCrypt security</div>
+              <div style="font-size:13px;color:#8585A0;line-height:1.55">An evolutionary encrypted tunnel authenticating the whole system.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:38px">Components</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+          <sc-for list="{{ dkParts }}" as="c" hint-placeholder-count="4">
+            <div style="background:#0C0C0F;padding:30px 26px;display:flex;flex-direction:column;gap:12px;min-height:226px" style-hover="background:#111115">
+              <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                <div style="font-size:21px;font-weight:600;letter-spacing:-0.02em">{{ c.name }}</div>
+              </div>
+              <div style="font-size:15px;line-height:1.6;color:#8585A0;flex:1">{{ c.desc }}</div>
+              <button type="button" class="dk-control" onClick="{{ c.onClick }}" style="background:transparent;border:0;padding:0;text-align:left;color:#FF5500;font-size:13px;font-weight:600;cursor:pointer" style-hover="color:#FF7A33">Open project page →</button>
+              <a href="{{ c.href }}" target="_blank" rel="noreferrer" style="font-size:12px;font-weight:500">{{ c.externalLabel }}</a>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px)">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#5CE02E;margin-bottom:18px">{{ dkExpressionsKicker }}</div>
+          <h2 style="font-size:clamp(28px,3.8vw,52px);line-height:1.04;letter-spacing:-0.035em;font-weight:600;margin:0 0 16px;max-width:22ch">{{ dkExpressionsTitle }}</h2>
+          <p style="font-size:16px;line-height:1.68;color:#8585A0;max-width:64ch;margin:0 0 30px;text-wrap:pretty">{{ dkExpressionsIntro }}</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+            <sc-for list="{{ dkExpressions }}" as="x" hint-placeholder-count="2">
+              <div style="background:#08080A;padding:28px 26px;display:flex;flex-direction:column;gap:10px;min-height:205px">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#6A6A80">{{ x.kicker }}</div>
+                <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em">{{ x.name }}</div>
+                <div style="font-size:14px;line-height:1.62;color:#8585A0;flex:1">{{ x.desc }}</div>
+                <button type="button" class="dk-control" onClick="{{ x.onClick }}" style="background:transparent;border:0;padding:0;text-align:left;color:#5CE02E;font-size:13px;font-weight:600;cursor:pointer" style-hover="color:#8CEC49">{{ x.action }} →</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:18px">Connected architecture</div>
+        <h2 style="font-size:clamp(28px,3.8vw,52px);line-height:1.04;letter-spacing:-0.035em;font-weight:600;margin:0 0 16px;max-width:22ch">{{ dkConnectionsTitle }}</h2>
+        <p style="font-size:16px;line-height:1.68;color:#8585A0;max-width:64ch;margin:0 0 30px;text-wrap:pretty">{{ dkConnectionsIntro }}</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+          <sc-for list="{{ dkConnections }}" as="k" hint-placeholder-count="5">
+            <button type="button" class="dk-control" onClick="{{ k.onClick }}" style="background:#0C0C0F;color:#EDECF0;border:0;text-align:left;padding:25px 24px;display:flex;flex-direction:column;gap:8px;min-height:188px;cursor:pointer" style-hover="background:#111115">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#FF5500">{{ k.relation }}</div>
+              <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em">{{ k.name }}</div>
+              <div style="font-size:14px;line-height:1.6;color:#8585A0;flex:1">{{ k.desc }}</div>
+              <div style="font-size:12px;color:#FF5500;font-weight:600">{{ k.action }} →</div>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px)">
+          <p style="font-size:clamp(23px,3vw,38px);line-height:1.18;letter-spacing:-0.03em;font-weight:500;margin:0 0 20px;max-width:34ch;text-wrap:pretty">Dk Global is the shared kernel that connects distributed intelligence, organization and computing.</p>
+          <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0;max-width:56ch;text-wrap:pretty">Its public architecture connects the DFM method, BSDK structure, network, security, identity and knowledge layers. Dk Personal carries that architecture into an individual context.</p>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isProject }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,82px) clamp(16px,4vw,44px) clamp(34px,5vw,62px);display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:clamp(28px,5vw,76px);align-items:start">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">{{ project.kicker }}</div>
+          <h1 class="dk-glow" style="font-size:clamp(36px,5.4vw,72px);line-height:0.98;letter-spacing:-0.04em;font-weight:700;margin:0 0 26px;max-width:18ch;text-wrap:balance">{{ project.title }}</h1>
+          <p style="font-size:clamp(17px,1.35vw,20px);line-height:1.62;color:#9898A8;max-width:58ch;margin:0 0 30px;text-wrap:pretty">{{ project.lead }}</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <button type="button" class="dk-control" onClick="{{ goEco }}" style="background:#FF5500;color:#08080A;border:0;padding:14px 22px;font-size:13px;font-weight:600;cursor:pointer" style-hover="background:#FF7A33">{{ projectBackLabel }}</button>
+            <button type="button" class="dk-control" onClick="{{ projectHome }}" style="background:transparent;border:1px solid #2E2E38;color:#EDECF0;padding:14px 22px;font-size:13px;font-weight:500;cursor:pointer" style-hover="border-color:#FF5500;color:#FF5500">{{ projectHomeLabel }}</button>
+          </div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.6;letter-spacing:0.04em;color:#6A6A80;max-width:58ch;margin:22px 0 0;text-wrap:pretty">{{ projectContextNote }}</p>
+        </div>
+
+        <aside style="border:1px solid #18181E;background:#0C0C0F;padding:28px 26px;display:flex;flex-direction:column;gap:18px">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:#FF5500;margin-bottom:9px">{{ projectRoleLabel }}</div>
+            <p style="font-size:16px;line-height:1.65;color:#D2D0D8;margin:0;text-wrap:pretty">{{ project.role }}</p>
+          </div>
+          <div style="border-top:1px solid #18181E;padding-top:18px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:#6A6A80;margin-bottom:12px">{{ projectRelationsLabel }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ projectRelations }}" as="r" hint-placeholder-count="4">
+                <button type="button" class="dk-control" onClick="{{ r.onClick }}" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.06em;padding:8px 10px;border:1px solid #2E2E38;background:transparent;color:#9898A8;cursor:pointer" style-hover="border-color:#FF5500;color:#FF5500">{{ r.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section style="border-top:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,82px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,78px)">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:18px">{{ projectIdeaLabel }}</div>
+            <h2 style="font-size:clamp(25px,3.2vw,42px);line-height:1.08;letter-spacing:-0.03em;font-weight:600;margin:0 0 20px;max-width:18ch">{{ project.thesis }}</h2>
+            <p style="font-size:16px;line-height:1.7;color:#8585A0;margin:0;max-width:58ch;text-wrap:pretty">{{ project.body }}</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1px;background:#18181E;border:1px solid #18181E">
+            <sc-for list="{{ projectFocus }}" as="f" hint-placeholder-count="3">
+              <div style="background:#0C0C0F;padding:22px 24px;display:flex;flex-direction:column;gap:7px">
+                <div style="font-size:17px;font-weight:600;letter-spacing:-0.015em">{{ f.title }}</div>
+                <div style="font-size:14px;line-height:1.6;color:#8585A0">{{ f.body }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,78px) clamp(16px,4vw,44px)">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500">{{ projectSourcesLabel }}</div>
+            <div style="font-size:13px;color:#6A6A80">{{ projectSourcesHint }}</div>
+          </div>
+          <sc-if value="{{ projectHasSources }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+              <sc-for list="{{ projectExternalLinks }}" as="l" hint-placeholder-count="2">
+                <a href="{{ l.href }}" target="_blank" rel="noreferrer" style="background:#0C0C0F;color:#EDECF0;padding:22px 24px;display:flex;flex-direction:column;gap:8px" style-hover="background:#111115;color:#FF5500">
+                  <div style="font-size:16px;font-weight:600">{{ l.label }} →</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#6A6A80;word-break:break-word">{{ l.host }}</div>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ projectHasNoSources }}" hint-placeholder-val="{{ true }}">
+            <div style="border:1px solid #18181E;background:#08080A;padding:22px 24px;font-size:14px;line-height:1.65;color:#8585A0">{{ projectSourcesEmpty }}</div>
+          </sc-if>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEco }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,78px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,72px);align-items:center">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Ecosystem</div>
+          <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 24px;max-width:22ch">{{ ecoTitle }}</h1>
+          <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:60ch;margin:0 0 34px;text-wrap:pretty">{{ ecoLead }}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ ecoFilters }}" as="f" hint-placeholder-count="5">
+              <button type="button" class="dk-control" aria-pressed="{{ f.selected }}" onClick="{{ f.onClick }}" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;padding:8px 13px;cursor:pointer;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:clamp(6px,2vw,26px)">
+<!-- Same physics-driven mark as the hero (suffix "4" gradients), in ecosystem blue. -->
+<svg ref="{{ markRef }}" viewBox="-128 -128 256 256" style="width:100%;max-width:300px;height:auto;display:block">
+            <defs>
+              <radialGradient id="dkglow4" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="138">
+                <stop offset="0.5" stop-color="#00D0FF" stop-opacity="0.17"></stop>
+                <stop offset="0.78" stop-color="#00D0FF" stop-opacity="0.05"></stop>
+                <stop offset="1" stop-color="#00D0FF" stop-opacity="0"></stop>
+              </radialGradient>
+              <radialGradient id="dkball4" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="172">
+                <stop offset="0" stop-color="#A1F7FF"></stop>
+                <stop offset="0.26" stop-color="#42E2FF"></stop>
+                <stop offset="0.6" stop-color="#0EC1E9"></stop>
+                <stop offset="0.88" stop-color="#00627F"></stop>
+                <stop offset="1" stop-color="#003044"></stop>
+              </radialGradient>
+              <radialGradient id="dkdark4" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="182">
+                <stop offset="0" stop-color="#1B1B22"></stop>
+                <stop offset="0.42" stop-color="#0D0D12"></stop>
+                <stop offset="1" stop-color="#040406"></stop>
+              </radialGradient>
+              <linearGradient id="dkrim4" gradientUnits="userSpaceOnUse" x1="-72" y1="-74" x2="76" y2="84">
+                <stop offset="0" stop-color="#000000" stop-opacity="0.4"></stop>
+                <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"></stop>
+                <stop offset="1" stop-color="#BEF6FF" stop-opacity="0.55"></stop>
+              </linearGradient>
+              <linearGradient id="dkring4" gradientUnits="userSpaceOnUse" x1="-104" y1="-104" x2="104" y2="104">
+                <stop offset="0" stop-color="#E4E4F0"></stop>
+                <stop offset="0.45" stop-color="#9090A8"></stop>
+                <stop offset="1" stop-color="#444462"></stop>
+              </linearGradient>
+              <linearGradient id="dkog4" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="74" y2="0" spreadMethod="repeat">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.11"></stop>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+              </linearGradient>
+              <clipPath id="dkow4" clipPathUnits="userSpaceOnUse"><circle r="100"></circle></clipPath>
+            </defs>
+            <g class="dk-core" style="transform-box:view-box;transform-origin:0 0">
+              <circle r="138" fill="url(#dkglow4)"></circle>
+              <path ref="{{ ringBackRef }}" d="" fill="none" stroke="#32324A" stroke-width="2" stroke-linecap="round"></path>
+              <circle r="100" fill="url(#dkball4)"></circle>
+              <g clip-path="url(#dkow4)"><g class="dk-surf"><rect x="-260" y="-110" width="520" height="220" fill="url(#dkog4)"></rect></g></g>
+              <path ref="{{ shadowRef }}" d="M -84.4 -53.7 A 118 38 45 0 0 0 50.7 A 118 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 50.7 A 118 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 118 38 -45 0 0 0 50.7 Z" fill="url(#dkdark4)"></path>
+              <path ref="{{ ringOverRef }}" d="" fill="none" stroke="#FFE8D0" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round"></path>
+              <path ref="{{ ringOutRef }}" d="M 83.4 83.4 A 118 38 45 0 1 -83.4 -83.4 A 118 38 45 0 1 83.4 83.4 Z M -83.4 83.4 A 118 38 -45 0 1 83.4 -83.4 A 118 38 -45 0 1 -83.4 83.4 Z" fill="none" stroke="url(#dkring4)" stroke-width="2.1" stroke-linecap="round"></path>
+              <circle r="100" fill="none" stroke="url(#dkrim4)" stroke-width="1.6"></circle>
+            </g>
+          </svg>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;text-align:center">THE MARK, IN ECOSYSTEM BLUE</div>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:0 clamp(16px,4vw,44px) clamp(54px,8vw,110px)">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+          <sc-for list="{{ ecoCards }}" as="p" hint-placeholder-count="10">
+            <button type="button" class="dk-control" onClick="{{ p.onClick }}" style="background:#0C0C0F;color:#EDECF0;border:0;text-align:left;padding:28px 24px;display:flex;flex-direction:column;gap:10px;min-height:218px;cursor:pointer" style-hover="background:#111115">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#6A6A80">{{ p.layer }}</div>
+              <div style="font-size:21px;font-weight:600;letter-spacing:-0.02em;line-height:1.15">{{ p.name }}</div>
+              <div style="font-size:14px;line-height:1.6;color:#8585A0;flex:1">{{ p.desc }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:#FF5500">Open project page →</div>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isOrgPage }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(40px,6vw,78px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,72px);align-items:center">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Organization</div>
+          <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 24px;max-width:22ch">{{ orgTitle }}</h1>
+          <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:62ch;margin:0;text-wrap:pretty">{{ orgLead }}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:clamp(6px,2vw,26px)">
+<!-- Same physics-driven mark as the hero (suffix "5" gradients), in organization gold. -->
+<svg ref="{{ markRef }}" viewBox="-128 -128 256 256" style="width:100%;max-width:300px;height:auto;display:block">
+            <defs>
+              <radialGradient id="dkglow5" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="138">
+                <stop offset="0.5" stop-color="#E6B816" stop-opacity="0.17"></stop>
+                <stop offset="0.78" stop-color="#E6B816" stop-opacity="0.05"></stop>
+                <stop offset="1" stop-color="#E6B816" stop-opacity="0"></stop>
+              </radialGradient>
+              <radialGradient id="dkball5" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="172">
+                <stop offset="0" stop-color="#FFEAAE"></stop>
+                <stop offset="0.26" stop-color="#F8D05C"></stop>
+                <stop offset="0.6" stop-color="#E6B816"></stop>
+                <stop offset="0.88" stop-color="#805E00"></stop>
+                <stop offset="1" stop-color="#452F00"></stop>
+              </radialGradient>
+              <radialGradient id="dkdark5" gradientUnits="userSpaceOnUse" cx="-42" cy="-48" r="182">
+                <stop offset="0" stop-color="#1B1B22"></stop>
+                <stop offset="0.42" stop-color="#0D0D12"></stop>
+                <stop offset="1" stop-color="#040406"></stop>
+              </radialGradient>
+              <linearGradient id="dkrim5" gradientUnits="userSpaceOnUse" x1="-72" y1="-74" x2="76" y2="84">
+                <stop offset="0" stop-color="#000000" stop-opacity="0.4"></stop>
+                <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"></stop>
+                <stop offset="1" stop-color="#F4E4B8" stop-opacity="0.55"></stop>
+              </linearGradient>
+              <linearGradient id="dkring5" gradientUnits="userSpaceOnUse" x1="-104" y1="-104" x2="104" y2="104">
+                <stop offset="0" stop-color="#E4E4F0"></stop>
+                <stop offset="0.45" stop-color="#9090A8"></stop>
+                <stop offset="1" stop-color="#444462"></stop>
+              </linearGradient>
+              <linearGradient id="dkog5" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="74" y2="0" spreadMethod="repeat">
+                <stop offset="0" stop-color="#fff" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#fff" stop-opacity="0.11"></stop>
+                <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+              </linearGradient>
+              <clipPath id="dkow5" clipPathUnits="userSpaceOnUse"><circle r="100"></circle></clipPath>
+            </defs>
+            <g class="dk-core" style="transform-box:view-box;transform-origin:0 0">
+              <circle r="138" fill="url(#dkglow5)"></circle>
+              <path ref="{{ ringBackRef }}" d="" fill="none" stroke="#32324A" stroke-width="2" stroke-linecap="round"></path>
+              <circle r="100" fill="url(#dkball5)"></circle>
+              <g clip-path="url(#dkow5)"><g class="dk-surf"><rect x="-260" y="-110" width="520" height="220" fill="url(#dkog5)"></rect></g></g>
+              <path ref="{{ shadowRef }}" d="M -84.4 -53.7 A 118 38 45 0 0 0 50.7 A 118 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 50.7 A 118 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 118 38 -45 0 0 0 50.7 Z" fill="url(#dkdark5)"></path>
+              <path ref="{{ ringOverRef }}" d="" fill="none" stroke="#FFE8D0" stroke-opacity="0.2" stroke-width="2" stroke-linecap="round"></path>
+              <path ref="{{ ringOutRef }}" d="M 83.4 83.4 A 118 38 45 0 1 -83.4 -83.4 A 118 38 45 0 1 83.4 83.4 Z M -83.4 83.4 A 118 38 -45 0 1 83.4 -83.4 A 118 38 -45 0 1 -83.4 83.4 Z" fill="none" stroke="url(#dkring5)" stroke-width="2.1" stroke-linecap="round"></path>
+              <circle r="100" fill="none" stroke="url(#dkrim5)" stroke-width="1.6"></circle>
+            </g>
+          </svg>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;text-align:center">THE MARK, IN ORGANIZATION GOLD</div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(38px,6vw,76px) clamp(16px,4vw,44px)">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1px;background:#18181E;border:1px solid #18181E">
+            <sc-for list="{{ orgUnits }}" as="u" hint-placeholder-count="5">
+              <div style="background:#0C0C0F;padding:30px 26px;display:flex;flex-direction:column;gap:11px;min-height:234px" style-hover="background:#111115">
+                <div style="font-size:21px;font-weight:600;letter-spacing:-0.02em">{{ u.name }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;color:#FF5500">{{ u.kind }}</div>
+                <div style="font-size:14px;line-height:1.62;color:#8585A0;flex:1">{{ u.desc }}</div>
+                <button type="button" class="dk-control" onClick="{{ u.onClick }}" style="background:transparent;border:0;padding:0;text-align:left;color:#FF5500;font-size:13px;font-weight:600;cursor:pointer" style-hover="color:#FF7A33">Open page →</button>
+                <a href="{{ u.href }}" target="_blank" rel="noreferrer" style="font-size:13px;font-weight:500">{{ u.link }}</a>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid #18181E;background:#0C0C0F">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(46px,7vw,96px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(28px,5vw,70px)">
+          <div>
+            <h2 style="font-size:clamp(23px,2.8vw,36px);line-height:1.08;letter-spacing:-0.03em;font-weight:600;margin:0 0 18px">{{ orgDaoTitle }}</h2>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 16px;text-wrap:pretty">{{ orgDaoBody }}</p>
+            <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0;text-wrap:pretty">Support requests are made only where there is no other alternative: the federation is funded by grants and side projects, resource efficiency matters, and the main projects are the priority.</p>
+          </div>
+          <div style="border-left:1px solid #18181E;padding-left:clamp(20px,3vw,40px);display:flex;flex-direction:column;gap:22px">
+            <sc-for list="{{ orgSteps }}" as="o" hint-placeholder-count="3">
+              <div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;color:#FF5500;margin-bottom:6px">{{ o.n }}</div>
+                <div style="font-size:14px;color:#8585A0;line-height:1.6">{{ o.body }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFn }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,78px) clamp(16px,4vw,44px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Open functions</div>
+        <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 24px;max-width:20ch">Take a function. Any size.</h1>
+        <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:58ch;margin:0 0 34px;text-wrap:pretty">Every issue is fragmented into functions small enough for one person to finish. Pick one, claim it in the issue thread, deliver it through the community review branch.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ fnFilters }}" as="f" hint-placeholder-count="5">
+            <button type="button" class="dk-control" aria-pressed="{{ f.selected }}" onClick="{{ f.onClick }}" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;padding:8px 13px;cursor:pointer;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="max-width:1320px;margin:0 auto;padding:0 clamp(16px,4vw,44px) clamp(54px,8vw,110px)">
+        <div role="status" aria-live="polite">
+          <sc-if value="{{ fnLoading }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #18181E;background:#0C0C0F;padding:26px 24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#6A6A80">LOADING OPEN FUNCTIONS FROM GITHUB…</div>
+          </sc-if>
+
+          <sc-if value="{{ fnHasRows }}" hint-placeholder-val="{{ true }}">
+            <div style="border:1px solid #18181E;border-bottom:none">
+              <sc-for list="{{ fnRows }}" as="r" hint-placeholder-count="8">
+                <a href="{{ r.href }}" target="_blank" rel="noreferrer" style="border-bottom:1px solid #18181E;padding:20px 22px;display:flex;gap:clamp(12px,2.4vw,30px);align-items:center;flex-wrap:wrap;background:#0C0C0F;color:#EDECF0" style-hover="background:#111115">
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5500;letter-spacing:0.08em;width:84px;flex-shrink:0">{{ r.id }}</div>
+                  <div style="flex:1;min-width:220px">
+                    <div style="font-size:16px;font-weight:500;letter-spacing:-0.01em;margin-bottom:4px">{{ r.title }}</div>
+                    <div style="font-size:12.5px;color:#65657A">{{ r.meta }}</div>
+                  </div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#9898A8;border:1px solid #242434;padding:5px 9px;flex-shrink:0">{{ r.level }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#65657A;width:66px;flex-shrink:0">{{ r.effort }}</div>
+                  <div style="font-size:13px;font-weight:600;color:#FF5500;flex-shrink:0">Open the issue →</div>
+                </a>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ fnEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #18181E;background:#0C0C0F;padding:clamp(24px,3.4vw,38px)">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#FF5500;margin-bottom:14px">{{ fnEmptyKicker }}</div>
+              <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 22px;max-width:66ch;text-wrap:pretty">{{ fnEmptyBody }}</p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <a href="https://github.com/draykerdk" target="_blank" rel="noreferrer" style="border:1px solid #2E2E38;color:#EDECF0;padding:13px 20px;font-size:13px;font-weight:500" style-hover="border-color:#FF5500;color:#FF5500">Browse the repositories →</a>
+                <button type="button" class="dk-control" onClick="{{ goJoin }}" style="background:#FF5500;color:#08080A;border:0;padding:13px 20px;font-size:13px;font-weight:600;cursor:pointer" style-hover="background:#FF7A33">Volunteer anyway</button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="border:1px solid #18181E;border-top:none;background:#08080A;padding:22px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:7px">HOW A FUNCTION IS OPENED</div>
+            <div style="font-size:13.5px;line-height:1.6;color:#8585A0">An issue in any Drayker repository becomes an open function when it is small enough for one person to finish and carries the <span style="font-family:'JetBrains Mono',monospace;color:#9898A8">open-function</span> label.</div>
+          </div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:7px">HOW YOU CLAIM ONE</div>
+            <div style="font-size:13.5px;line-height:1.6;color:#8585A0">Say so in the issue thread before starting, so two people do not carry the same function. Deliver through the community review branch.</div>
+          </div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:7px">WHERE THIS LIST COMES FROM</div>
+            <div style="font-size:13.5px;line-height:1.6;color:#8585A0">Read live from the public GitHub issues of the draykerdk organization. Nothing on this board is written by hand.</div>
+          </div>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDocs }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,78px) clamp(16px,4vw,44px)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Docs &amp; papers</div>
+        <h1 style="font-size:clamp(36px,5.4vw,72px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 24px;max-width:22ch">{{ docsTitle }}</h1>
+        <p style="font-size:clamp(16px,1.3vw,19px);line-height:1.62;color:#9898A8;max-width:62ch;margin:0 0 20px;text-wrap:pretty">{{ docsLead }}</p>
+        <p style="font-size:15px;line-height:1.68;color:#8585A0;max-width:62ch;margin:0;text-wrap:pretty">All proposed resolutions published here are solutions to the requirements of Dk and the Drayker platform — only those requirements are final. The motions illustrate what should be done; the definitive architecture will be structured around optimal solutions developed with metaprogramming intelligent algorithms and research organized through DFMP.</p>
+      </section>
+
+      <section style="border-top:1px solid #18181E">
+        <div style="max-width:1320px;margin:0 auto;padding:clamp(38px,6vw,72px) clamp(16px,4vw,44px)">
+          <div style="border:1px solid #18181E;border-bottom:none">
+            <sc-for list="{{ docs }}" as="d" hint-placeholder-count="7">
+              <a href="{{ d.href }}" target="_blank" rel="noreferrer" style="border-bottom:1px solid #18181E;padding:22px;display:flex;gap:clamp(12px,2.4vw,28px);align-items:center;flex-wrap:wrap;background:#0C0C0F;color:#EDECF0" style-hover="background:#111115">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6A6A80;width:96px;flex-shrink:0;letter-spacing:0.08em">{{ d.tag }}</div>
+                <div style="flex:1;min-width:230px">
+                  <div style="font-size:17px;font-weight:600;letter-spacing:-0.015em;margin-bottom:4px">{{ d.name }}</div>
+                  <div style="font-size:13.5px;color:#8585A0;line-height:1.5;margin-bottom:5px">{{ d.desc }}</div>
+                  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#65657A;line-height:1.5">{{ d.state }}</div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5500">{{ d.host }} →</div>
+              </a>
+            </sc-for>
+          </div>
+          <p style="font-size:13px;color:#6A6A80;margin:18px 0 0;line-height:1.6">{{ docsFoot }}</p>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
+      <div class="dk-page">
+      <section style="max-width:1320px;margin:0 auto;padding:clamp(42px,6vw,78px) clamp(16px,4vw,44px) clamp(54px,8vw,110px);display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(30px,5vw,80px)">
+        <div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#FF5500;margin-bottom:22px">Volunteer</div>
+          <h1 style="font-size:clamp(34px,4.6vw,64px);line-height:1;letter-spacing:-0.04em;font-weight:700;margin:0 0 24px;max-width:18ch">There will be no shortage of things to do.</h1>
+          <p style="font-size:16px;line-height:1.68;color:#8585A0;margin:0 0 28px;max-width:46ch;text-wrap:pretty">You do not need to know the whole system to contribute to it — that is the point of the protocol. Tell us what you are good at and what you care about, and we will point you at functions that fit.</p>
+          <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #18181E;padding-top:24px">
+            <div style="font-size:14px;color:#8585A0;line-height:1.6"><strong style="color:#EDECF0;font-weight:500">No obligation of hours.</strong> Functions are sized so that finishing one is always possible.</div>
+            <div style="font-size:14px;color:#8585A0;line-height:1.6"><strong style="color:#EDECF0;font-weight:500">Everything is documented.</strong> Your work stays attributed, reviewable and permanent.</div>
+            <div style="font-size:14px;color:#8585A0;line-height:1.6"><strong style="color:#EDECF0;font-weight:500">Not only code.</strong> Research, translation, design, review, governance and outreach all have open functions.</div>
+          </div>
+        </div>
+
+        <div style="border:1px solid #18181E;background:#0C0C0F;padding:clamp(24px,3.4vw,40px)">
+          <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#FF5500;margin-bottom:26px">APPLICATION</div>
+            <div style="display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label for="volunteer-name" style="font-size:12px;letter-spacing:0.06em;color:#8585A0;text-transform:uppercase">Name</label>
+                <input id="volunteer-name" type="text" autocomplete="name" value="{{ fName }}" onChange="{{ setName }}" placeholder="How should we call you?" style="background:#08080A;border:1px solid #222230;color:#EDECF0;padding:12px 14px;font-size:15px;outline:none;width:100%" style-focus="border-color:#FF5500" />
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label for="volunteer-contact" style="font-size:12px;letter-spacing:0.06em;color:#8585A0;text-transform:uppercase">GitHub handle</label>
+                <input id="volunteer-contact" type="text" autocomplete="username" value="{{ fContact }}" onChange="{{ setContact }}" placeholder="@handle" style="background:#08080A;border:1px solid #222230;color:#EDECF0;padding:12px 14px;font-size:15px;outline:none;width:100%" style-focus="border-color:#FF5500" />
+                <div style="font-size:12px;color:#6A6A80;line-height:1.55">Optional — the issue already carries your GitHub account. Do not put an email address or a phone number here: the issue is public.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div id="volunteer-skills-label" style="font-size:12px;letter-spacing:0.06em;color:#8585A0;text-transform:uppercase">Where you can help</div>
+                <div role="group" aria-labelledby="volunteer-skills-label" style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ skills }}" as="s" hint-placeholder-count="8">
+                    <button type="button" class="dk-control" aria-pressed="{{ s.selected }}" onClick="{{ s.onClick }}" style="font-size:12.5px;padding:8px 13px;cursor:pointer;border:1px solid {{ s.bd }};background:{{ s.bg }};color:{{ s.fg }}">{{ s.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div id="volunteer-hours-label" style="font-size:12px;letter-spacing:0.06em;color:#8585A0;text-transform:uppercase">Hours a week you can give</div>
+                <div role="group" aria-labelledby="volunteer-hours-label" style="display:flex;gap:8px;flex-wrap:wrap">
+                  <sc-for list="{{ hours }}" as="h" hint-placeholder-count="4">
+                    <button type="button" class="dk-control" aria-pressed="{{ h.selected }}" onClick="{{ h.onClick }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 14px;cursor:pointer;border:1px solid {{ h.bd }};background:{{ h.bg }};color:{{ h.fg }}">{{ h.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label for="volunteer-why" style="font-size:12px;letter-spacing:0.06em;color:#8585A0;text-transform:uppercase">What draws you to Drayker?</label>
+                <textarea id="volunteer-why" value="{{ fWhy }}" onChange="{{ setWhy }}" rows="4" placeholder="A problem you want solved, a project you already follow…" style="background:#08080A;border:1px solid #222230;color:#EDECF0;padding:12px 14px;font-size:15px;outline:none;width:100%;resize:vertical;line-height:1.55" style-focus="border-color:#FF5500"></textarea>
+              </div>
+              <button type="button" class="dk-control" onClick="{{ submit }}" style="background:#FF5500;color:#08080A;border:0;padding:16px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;box-shadow:0 0 24px rgba(255,85,0,0.25)" style-hover="background:#FF7A33;box-shadow:0 0 36px rgba(255,85,0,0.4)">Review it on GitHub →</button>
+              <div style="font-size:12px;color:#6A6A80;line-height:1.6">This page sends nothing on its own. It opens a new issue on <span style="font-family:'JetBrains Mono',monospace">draykerdk/drayker.org</span> with what you wrote already filled in — you read it, edit it and publish it yourself. The issue is public, and so is everything you leave in it.</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+            <div role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:16px;padding:30px 0;min-height:300px;justify-content:center">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#FF5500">GITHUB IS OPEN IN A NEW TAB</div>
+              <div style="font-size:26px;font-weight:600;letter-spacing:-0.025em;line-height:1.15">Almost there, {{ sentName }}.</div>
+              <p style="font-size:15px;line-height:1.66;color:#8585A0;margin:0">Your application is drafted as a GitHub issue, not sent yet. Read it, change anything you want, then submit it there — that publishes it and puts it in front of the people who can point you at a first function. If the tab did not open, use the link below.</p>
+              <a href="{{ issueUrl }}" target="_blank" rel="noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.06em;word-break:break-all">Open the draft issue →</a>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+                <button type="button" class="dk-control" onClick="{{ goFn }}" style="background:transparent;border:1px solid #2E2E38;color:#EDECF0;padding:13px 22px;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#FF5500;color:#FF5500">See open functions</button>
+                <button type="button" class="dk-control" onClick="{{ editAgain }}" style="background:transparent;border:1px solid #2E2E38;color:#EDECF0;padding:13px 22px;font-size:14px;font-weight:500;cursor:pointer" style-hover="border-color:#FF5500;color:#FF5500">Edit the answers</button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <footer style="border-top:1px solid #18181E;background:#0C0C0F">
+    <div style="max-width:1320px;margin:0 auto;padding:clamp(38px,5vw,64px) clamp(16px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(26px,4vw,54px)">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+<svg viewBox="-106 -106 212 212" width="24" height="24" style="display:block">
+          <ellipse cx="0" cy="0" rx="119" ry="38" transform="rotate(45)" fill="none" stroke="#8585A0" stroke-width="3.6"></ellipse>
+          <ellipse cx="0" cy="0" rx="119" ry="38" transform="rotate(-45)" fill="none" stroke="#8585A0" stroke-width="3.6"></ellipse>
+          <circle r="100" fill="#FF5500"></circle>
+          <path d="M -84.4 -53.7 A 119 38 45 0 0 0 51.2 A 119 38 -45 0 0 84.4 -53.7 A 100 100 0 0 0 -84.4 -53.7 Z M 0 51.2 A 119 38 45 0 0 53.7 84.4 A 100 100 0 0 1 -53.7 84.4 A 119 38 -45 0 0 0 51.2 Z" fill="#000000"></path>
+
+        </svg>
+          <span style="font-size:15px;font-weight:600;letter-spacing:-0.02em">Drayker</span>
+        </div>
+        <div style="font-size:13px;color:#65657A;line-height:1.6;max-width:30ch">Go beyond things. Do more with less.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:4px">SYSTEM</div>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goDfm }}">DFM Protocol</button>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goDk }}">Dk</button>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goEco }}">Ecosystem</button>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goDocs }}">Docs</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:4px">PARTICIPATE</div>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goFn }}">Open functions</button>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goJoin }}">Volunteer</button>
+        <button type="button" class="dk-control dk-footer-link" onClick="{{ goOrgPage }}">Organization</button>
+        <a href="https://github.com/draykerdk" target="_blank" rel="noreferrer" style="font-size:13.5px;color:#9898A8" style-hover="color:#FF5500">GitHub</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:#6A6A80;margin-bottom:4px">ELSEWHERE</div>
+        <a href="https://steemit.com/@drayker" target="_blank" rel="noreferrer" style="font-size:13.5px;color:#9898A8" style-hover="color:#FF5500">Steemit</a>
+        <a href="https://medium.com/drayker" target="_blank" rel="noreferrer" style="font-size:13.5px;color:#9898A8" style-hover="color:#FF5500">Medium</a>
+        <a href="https://twitter.com/Draykerdk" target="_blank" rel="noreferrer" style="font-size:13.5px;color:#9898A8" style-hover="color:#FF5500">Twitter</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid #18181E">
+      <div style="max-width:1320px;margin:0 auto;padding:18px clamp(16px,4vw,44px);display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#6A6A80;letter-spacing:0.06em">SITE CONTENT CC BY 4.0 · OPEN SOURCE · NON-PROFIT</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#6A6A80;letter-spacing:0.06em">{{ domain }}</div>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;site&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;com&quot;,&quot;org&quot;],&quot;default&quot;:&quot;org&quot;,&quot;tsType&quot;:&quot;'com' | 'org'&quot;,&quot;section&quot;:&quot;Site&quot;}}">
+// ============================================================================
+// BUILD IDENTITY — the only lines that differ between the two deployments.
+//
+// One component, two sites. This repository publishes the .org presentation
+// (cooperation, documentation, open functions); draykerdk/drayker.com publishes
+// the .com one (institutional overview) from a file generated by
+// `node tools/make-com.js`, so the two can never drift apart.
+//
+// The domain switch in the header is a real link to the other domain, not an
+// in-page preview: each deployment only ever renders its own presentation, and
+// a `#com/...` route arriving here is handed over to the other site.
+// ============================================================================
+const SITE = 'com';
+// Until drayker.com resolves to GitHub Pages this points at the staging URL of that
+// repository — linking to a domain that answers 404 would be worse than linking to a
+// staging address. Change to 'https://drayker.com' on the day the DNS is pointed.
+const CROSS_SITE_URL = 'https://drayker.org';
+
+const A = '#FF5500';
+
+const PRINCIPLES = [
+  { n: '01', title: 'Simplicity and cleanliness', body: 'The smallest structure that solves the problem is the correct one. Complexity has to justify itself.' },
+  { n: '02', title: 'Automation', body: 'Anything a machine can carry, a machine carries. Human attention is the scarce resource.' },
+  { n: '03', title: 'Traceability', body: 'Undocumented work does not exist. Every function traces back to the model it came from.' },
+  { n: '04', title: 'Agile development is evolutionary', body: 'The protocol changes without breaking what was built on it. Nothing is frozen; nothing is lost.' },
+  { n: '05', title: 'Worldwide collaboration', body: 'Strangers on opposite sides of the planet must be able to work on the same issue without a manager in between.' },
+  { n: '06', title: 'International community, local emergence', body: 'One global body, many local initiatives. Autonomy at the edge, coherence at the centre.' }
+];
+
+const STEPS = [
+  { n: '01', title: 'Model', tag: 'Modularization of the issue',
+    body: 'Modeling and modularization of an issue to be solved, defining the initial strategy in a Bayesian model.',
+    note: 'Before any code, the issue is expressed as a model: what is known, what is assumed, what would change the strategy.' },
+  { n: '02', title: 'Fragment', tag: 'Partition into small functions',
+    body: 'Partitioning and fragmentation of the problem, forming small functions.',
+    note: 'A function is the unit of collaboration: small enough that one person can complete it, defined enough that its result composes with the rest.' },
+  { n: '03', title: 'Distribute', tag: 'Among collaborators, worldwide',
+    body: 'Distribution of functions among collaborators, through decentralized peer review.',
+    note: 'Nobody assigns work. Functions are open; contributors claim what matches their skill, anywhere in the world.' },
+  { n: '04', title: 'Review', tag: 'Decentralized peer review',
+    body: 'Ideas are discussed with communities and councils and turned into a comprehensive, detailed and widely revised paper.',
+    note: 'Validation runs alongside development instead of after it. Papers pass through the DAOs and councils depending on their purpose.' },
+  { n: '05', title: 'Legitimate', tag: 'Community review branch → master',
+    body: 'Once legitimated, a pull request goes through the community review branch to be legitimized for master.',
+    note: 'Updates travel first through the branch of the paper\u2019s own validation status. The history of a decision is always traceable.' }
+];
+
+const PUBLIC_LABELS = {
+  home: 'Home', manifesto: 'Manifesto', dfm: 'DFM / DFMP', dk: 'Dk Global', eco: 'Ecosystem',
+  org: 'Organization', docs: 'Docs', join: 'Volunteer', bsdk: 'BSDK', 'dk-network': 'Dk Network',
+  lcrypt: 'Living Cryptography', uid: 'UID', daf: 'DAF', metadfmp: 'MetaDFMP',
+  emergence: 'Emergence Initiative', dknowledger: 'Dknowledge', 'distributed-support': 'Distributed support',
+  'dk-personal': 'Dk Personal', 'open-science': 'Open science & health', 'value-unit': 'Value unit'
+};
+
+const PROJECT_PAGES = {
+  bsdk: {
+    label: 'BSDK', kicker: 'Dk component · base structure', title: 'BSDK — the base structure',
+    lead: 'BSDK is where the base structure of the Dk kernel is proposed: the repository publishes motions for resolution on how functions and modules are assembled.',
+    thesis: 'Proposals for the structure the kernel is meant to grow from.',
+    role: 'BSDK is the structural layer DFM modeling and the Dk architecture are meant to compose on. Its repository is described as the DNA Kernel FM — the base structure for system construction.',
+    body: 'What is published today is a set of motions for resolution, not a finished specification. The repository is explicit about it: only the requirements of Dk and the Drayker platform are final. The motions illustrate what should be done, while the definitive architecture is expected to come from optimal solutions developed with metaprogramming algorithms and research organized through DFMP.',
+    focus: [
+      { title: 'Motions, not decrees', body: 'Proposals are published as motions that can be discussed, revised and replaced through DFMP.' },
+      { title: 'Requirements are the fixed part', body: 'Only Dk’s requirements are treated as final; the structure that serves them stays open.' },
+      { title: 'A shared vocabulary', body: 'BSDK is meant to give DFM and Dk one structural language for distributed work.' }
+    ],
+    comLead: 'BSDK is the base structure proposed for the Dk kernel — the layer that describes how functions and modules are assembled into a distributed system.',
+    comThesis: 'The structural foundation of the kernel.',
+    comRole: 'Base Structure DK, described as the DNA of the kernel: the structural layer beneath Dk, the network and the applications built on them.',
+    comBody: 'BSDK is published as motions for resolution rather than a closed specification. Drayker treats the requirements of Dk and the platform as final and the structure serving them as open to research and revision.',
+    comFocus: [
+      { title: 'Foundation', body: 'A common structure for the functions and modules the kernel is composed of.' },
+      { title: 'Open architecture', body: 'The definitive design is expected to emerge from research and proposals, not from a single author.' },
+      { title: 'Place in the system', body: 'BSDK sits directly beneath Dk Global and the network layer.' }
+    ],
+    related: ['dk', 'dfm', 'dk-network'],
+    external: [
+      { label: 'BSDK docs site', host: 'bsdk.drayker.org', href: 'https://bsdk.drayker.org' },
+      { label: 'BSDK repository', host: 'github.com/draykerdk/bsdk', href: 'https://github.com/draykerdk/bsdk' }
+    ]
+  },
+  'dk-network': {
+    label: 'Dk Network', kicker: 'Dk component · network layer', title: 'Dk Network — the network layer',
+    lead: 'Dk Network is published as a list of requirements for the network beneath the ecosystem: two networks, three layers, and the properties they have to preserve.',
+    thesis: 'Write the requirements first, then let the network be built against them.',
+    role: 'Dk Network is the transport layer between Dk components, applications and any other network that participates — as long as the architecture’s requirements are preserved.',
+    body: 'The public description is a main network plus a test and interaction network with three layers, and the requirements they must satisfy: compatibility with Living Cryptography, a modular and evolutionary protocol, intelligent interconnection, separation of layers and subnetworks, distribution and fault tolerance, offline adaptability and DFM architecture. The repository points to an Initial Network Architecture for the remaining requirements; that document is not published yet.',
+    focus: [
+      { title: 'Two networks, three layers', body: 'A main network and a test/interaction network are separated while remaining one architecture.' },
+      { title: 'Resilience as a requirement', body: 'Distribution, fault tolerance and offline adaptability are stated up front, not added later.' },
+      { title: 'Other networks may join', body: 'Participation is open while the requirements of the Drayker architecture are preserved.' }
+    ],
+    comLead: 'Dk Network is the distributed network layer of the ecosystem — described as a parallel internet built on Dk: distributed, fault-tolerant and intelligent by construction.',
+    comThesis: 'A network defined by what it must guarantee.',
+    comRole: 'The transport layer that connects the kernel, the applications and the participating networks of the Drayker ecosystem.',
+    comBody: 'Drayker describes the network as a main network and a test/interaction network with three layers, bound to a public set of requirements: modular and evolutionary protocol, intelligent interconnection, separated subnetworks, fault tolerance, offline adaptability and compatibility with the security layer.',
+    comFocus: [
+      { title: 'Parallel network', body: 'A distributed network layer of its own rather than a service on top of an existing one.' },
+      { title: 'Interoperable', body: 'Other networks can take part when the architecture’s requirements are preserved.' },
+      { title: 'Built on Dk', body: 'The network carries the kernel’s architecture into the transport layer.' }
+    ],
+    related: ['dk', 'bsdk', 'lcrypt', 'dfm'],
+    external: [
+      { label: 'Dk Network repository', host: 'github.com/draykerdk/dk-network', href: 'https://github.com/draykerdk/dk-network' },
+      { label: 'Dk Network documentation', host: 'dknetwork.drayker.org', href: 'https://dknetwork.drayker.org' }
+    ]
+  },
+  lcrypt: {
+    label: 'Living Cryptography', kicker: 'Dk component · security layer', title: 'Living Cryptography — security that adapts',
+    lead: 'Living Cryptography proposes a security model in which authentication, encryption and distributed computation reinforce one another — described in the repository as a hydra: cut one head and two grow back.',
+    thesis: 'Encryption that answers an attack by changing.',
+    role: 'LCrypt is the security concept attached to the distributed network: a request has to be computed and authenticated by the system before data can be reached.',
+    body: 'The proposal works through a uPOW — a unit of proof-of-work the requester runs so the network can analyse and approve or reject the request. Part of that computation goes to the authentication schemes and the larger part to the distributed network. A rejected request is meant to change the cryptographic scheme, which is what removes the value of repeating a brute-force attempt. The stated consequence is unusual: under attack the network gets more work, and the security schemes are supposed to get stronger. This is a design proposal — the repository is the source for it and for its limits.',
+    focus: [
+      { title: 'uPOW before access', body: 'A request is computed and evaluated by the distributed system before data is released.' },
+      { title: 'The scheme changes on failure', body: 'A rejected authentication is meant to change the encryption, so repetition stops paying off.' },
+      { title: 'Security as network work', body: 'The computation is designed to feed the network rather than sit beside it as a separate service.' }
+    ],
+    comLead: 'Living Cryptography is the security layer proposed for the Drayker network: an evolutionary encrypted tunnel that authenticates the distributed system end to end.',
+    comThesis: 'Security that adapts instead of holding still.',
+    comRole: 'The security concept that protects the distributed computing system supporting the whole platform.',
+    comBody: 'The model couples authentication to distributed computation: a request must be calculated and evaluated by the network, and a failed authentication is meant to change the cryptographic scheme rather than simply deny access. Drayker publishes it as a proposal to be developed and reviewed, not as a shipped implementation.',
+    comFocus: [
+      { title: 'Adaptive by design', body: 'The encryption is meant to respond to attack rather than remain fixed.' },
+      { title: 'Coupled to the network', body: 'Authentication work and network computation are part of the same system.' },
+      { title: 'Open proposal', body: 'The technical model and its limits are published for review.' }
+    ],
+    related: ['dk-network', 'bsdk', 'dk'],
+    external: [
+      { label: 'Living Cryptography repository', host: 'github.com/draykerdk/living-cryptography', href: 'https://github.com/draykerdk/living-cryptography' },
+      { label: 'LCrypt documentation', host: 'lc.drayker.org', href: 'https://lc.drayker.org' }
+    ]
+  },
+  uid: {
+    label: 'UID', kicker: 'Dk component · identity layer', title: 'UID — universal identity',
+    lead: 'UID is the proposed universal identity and primary interface for applications across Drayker — and, today, an open place to discuss what that identity should be.',
+    thesis: 'One identity that can move through many applications without losing context.',
+    role: 'UID is the identity and application-facing layer meant to connect people, contribution history and the systems built on the Dk foundation.',
+    body: 'The repository describes UID as the primary system design and the super app that will serve as the basis for the platform’s applications. In practice it is an open room: issues, documentation, proposals, research and data about universal identity. This page describes a design direction under discussion, not a service you can sign in to.',
+    focus: [
+      { title: 'A shared identity model', body: 'Applications would recognise a participant the same way instead of each inventing its own account.' },
+      { title: 'Primary interface', body: 'UID is described as the entry point for applications built on the platform.' },
+      { title: 'Open discussion', body: 'The repository exists so the model can be argued about, researched and documented in public.' }
+    ],
+    comLead: 'UID — Universal Identity Drayker — is the identity layer and primary interface proposed for every application on the platform.',
+    comThesis: 'One identity across the whole ecosystem.',
+    comRole: 'The application-facing layer of Drayker: the way people, contribution and services would meet the systems built on Dk.',
+    comBody: 'Drayker publishes UID as the primary system design for identity — a super app meant to serve as the basis for the platform’s applications. The repository is where the design, research and proposals behind it are discussed in public.',
+    comFocus: [
+      { title: 'Identity', body: 'A common model for recognising participants across applications.' },
+      { title: 'Applications', body: 'The interface layer the rest of the platform is expected to build against.' },
+      { title: 'In design', body: 'UID is an architectural proposal under discussion, not a released product.' }
+    ],
+    related: ['dk', 'daf', 'eco'],
+    external: [
+      { label: 'UID repository', host: 'github.com/draykerdk/uid', href: 'https://github.com/draykerdk/uid' },
+      { label: 'UID docs site', host: 'uid.drayker.org', href: 'https://uid.drayker.org' }
+    ]
+  },
+  daf: {
+    label: 'DAF', kicker: 'Organization · federation layer', title: 'DAF — a federation for resources and governance',
+    lead: 'DAF is the organizational layer of Drayker: the alliance basis between its DAOs and DACs, and the model for how resources are asked for and decided on.',
+    thesis: 'Autonomous units can cooperate without giving up their own scope.',
+    role: 'DAF is where organizations, projects and initiatives link to a shared federative structure for resources, support and decisions.',
+    body: 'Anyone — a person, a team, a project or an initiative — can create a DAO and link it to the federation contract. Over time a DAO accumulates federative points and voting power over federation resources and decisions. The published rule about money is deliberately strict: the initial DAO is funded by grants and side projects, support requests are made only where there is no other alternative, resource efficiency matters, and the main projects come first.',
+    focus: [
+      { title: 'Anyone can form a unit', body: 'A person, team, project or initiative can create a DAO and link it to the federation.' },
+      { title: 'Points, then voice', body: 'Federative points accumulate with delivered work and carry voting power over resources and decisions.' },
+      { title: 'Support is the last resort', body: 'Requests are made only where no other alternative exists; the main projects are the priority.' }
+    ],
+    comLead: 'DAF — the Decentralized Autonomous Federation — is the non-profit organizational model of Drayker: the alliance basis between its DAOs and DACs.',
+    comThesis: 'A federation instead of a head office.',
+    comRole: 'The layer that governs shared resources and connects the autonomous units of the ecosystem without a central owner.',
+    comBody: 'Units link to the federation and accumulate federative points and voting power over its resources and decisions as they deliver work. The federation is funded by grants and side projects, and treats support requests as a last resort with the main projects as the priority.',
+    comFocus: [
+      { title: 'Non-profit', body: 'Resources are governed by the federation rather than owned by an organization.' },
+      { title: 'Autonomous units', body: 'Each DAO or DAC keeps its own scope and its own decisions.' },
+      { title: 'Weight follows work', body: 'Voting power accumulates through contribution, not appointment.' }
+    ],
+    related: ['org', 'dfm', 'dk', 'uid'],
+    external: [
+      { label: 'DAF repository', host: 'github.com/draykerdk/daf', href: 'https://github.com/draykerdk/daf' },
+      { label: 'DAF docs site', host: 'daf.drayker.org', href: 'https://daf.drayker.org' }
+    ]
+  },
+  metadfmp: {
+    label: 'MetaDFMP', kicker: 'Protocol component · modeling intelligence', title: 'MetaDFMP — modeling intelligence',
+    lead: 'MetaDFMP is the intended place for modeling, training and testing DFM with artificial intelligence. Its public material is still a single line of intent.',
+    thesis: 'Use models to improve the way models are built.',
+    role: 'MetaDFMP is meant to connect the proposal and modeling process to experiments in training, testing and metaprogramming — the research BSDK and DFMP refer to when they say the definitive architecture will come from optimal solutions.',
+    body: 'This page is honest about its own state: the repository currently states the purpose — modeling, training and testing by A.I — and nothing more. Other Drayker documents lean on that idea, which is exactly why the layer has a page here: so it can be found, discussed and written, rather than assumed. Opening the work means writing down what would be modelled, against which requirements, and how a result would be judged.',
+    focus: [
+      { title: 'Stated purpose', body: 'Modeling, training and testing of DFM intelligence with artificial intelligence.' },
+      { title: 'Referenced by others', body: 'BSDK and DFMP both point at this kind of research when describing how the final architecture is chosen.' },
+      { title: 'Open to be written', body: 'The documentation does not exist yet — this is a place to start it, not a finished layer.' }
+    ],
+    comLead: 'MetaDFMP is the research layer where DFM modeling meets artificial intelligence — modeling, training and testing of the method itself.',
+    comThesis: 'The method studying its own models.',
+    comRole: 'The layer through which Drayker expects better structures for distributed systems to be proposed and evaluated.',
+    comBody: 'Drayker treats the architecture of its systems as something to be researched rather than decreed, and MetaDFMP is where that research is meant to happen. Its public material is currently a statement of purpose; the layer is part of the map because other parts of the system depend on it.',
+    comFocus: [
+      { title: 'Research layer', body: 'Modeling, training and testing applied to the method itself.' },
+      { title: 'Connected to DFMP', body: 'The proposal process refers to this research when choosing between solutions.' },
+      { title: 'Early stage', body: 'The public documentation is a purpose statement, not a body of work.' }
+    ],
+    related: ['dfm', 'dk', 'bsdk'],
+    external: [
+      { label: 'MetaDFMP repository', host: 'github.com/draykerdk/metadfmp', href: 'https://github.com/draykerdk/metadfmp' },
+      { label: 'MetaDFMP docs site', host: 'metadfmp.drayker.org', href: 'https://metadfmp.drayker.org' }
+    ]
+  },
+  emergence: {
+    label: 'Emergence Initiative', kicker: 'Organization · open edge', title: 'Emergence Initiative — room for new work',
+    lead: 'The Emergence Initiative is the open edge of Drayker: where issues that do not belong to the DFMP, DFMPP or MetaDFM models are handled while their real home is still unclear.',
+    thesis: 'Useful ideas need somewhere to land before they know their final form.',
+    role: 'Emergence is the intake point for collaboration that has no obvious owner yet — a place to document and discuss work before routing it to the part of Drayker that can carry it.',
+    body: 'The repository describes itself as still opening, looking for ways to publish its papers, and explicitly open to suggestions. That is the whole point of the layer: not every useful contribution starts as a core protocol, and forcing a category too early loses the contribution. If you do not know where your idea belongs, it belongs here first.',
+    focus: [
+      { title: 'No category required', body: 'Issues outside the DFMP, DFMPP and MetaDFM models are managed here.' },
+      { title: 'Suggestions wanted', body: 'The initiative states plainly that it is open to proposals about how it should work.' },
+      { title: 'Routing, later', body: 'Work moves toward DFM, DAF, Dk or another project once its relation becomes clear.' }
+    ],
+    comLead: 'The Emergence Initiative is the open edge of the organization: a collaborative space for papers and proposals that do not fit the core models.',
+    comThesis: 'An organization needs a permeable border.',
+    comRole: 'The intake layer that keeps Drayker open to contributions it has not anticipated.',
+    comBody: 'Drayker organizes its core work through DFMP and its main projects. Emergence exists so that useful work arriving from outside that structure is not lost for lack of a category — it is documented, discussed and routed once its relation to the ecosystem is understood.',
+    comFocus: [
+      { title: 'Open edge', body: 'A defined place for contributions the core structure does not cover.' },
+      { title: 'Collaborative', body: 'Papers and proposals are discussed in the open.' },
+      { title: 'Connected', body: 'Work is routed into the ecosystem once its place is clear.' }
+    ],
+    related: ['dfm', 'eco', 'org'],
+    external: [
+      { label: 'Emergence Initiative repository', host: 'github.com/draykerdk/emergence-initiative', href: 'https://github.com/draykerdk/emergence-initiative' },
+      { label: 'Emergence docs site', host: 'ei.drayker.org', href: 'https://ei.drayker.org' }
+    ]
+  },
+  dknowledger: {
+    label: 'Dknowledge', kicker: 'Drayker component · knowledge layer', title: 'Dknowledge — connected memory for the work',
+    lead: 'The knowledge layer is where Drayker\u2019s vision, papers, architecture and decisions stay connected to each other. Its public face is Dknowledge \u2014 the knowledge base.',
+    thesis: 'A complex system needs memory that can be followed, not just information that can be stored.',
+    role: 'The knowledge layer connects the conceptual work of Drayker to its projects, papers and roadmap, so that architecture can become coordinated action instead of scattered intent.',
+    body: 'Dknowledge is described as the base for Drayker and Dk knowledge: papers organised by main project \u2014 Dk, ecosystem, organization \u2014 plus a roadmap index and a contribution guide. Its first versions are aimed at getting volunteers and stakeholders into the ecosystem; the longer aim is a structured base for Dk\u2019s data, sensors, files, oracles, processes and ontologies, with public, federated and private data. That last part is a direction, not a running system.',
+    focus: [
+      { title: 'Papers, by project', body: 'Material is organised around the main projects rather than by date or author.' },
+      { title: 'A way in', body: 'The early versions exist to give volunteers and stakeholders a place to start.' },
+      { title: 'Sources stay attached', body: 'Vision, architecture and decisions remain connected to where they came from.' }
+    ],
+    comLead: 'Dknowledge is the knowledge base of Drayker and Dk: papers, roadmap and the architecture behind the ecosystem, kept in one connected place.',
+    comThesis: 'Knowledge that can be followed from idea to decision.',
+    comRole: 'The knowledge layer of the ecosystem \u2014 the connective tissue between what Drayker means, what it designs and what it decides.',
+    comBody: 'The knowledge base organises papers by main project and publishes the roadmap of Drayker\u2019s work. It is also intended, over time, to become the structured base for Dk\u2019s data, processes and ontologies across public, federated and private layers.',
+    comFocus: [
+      { title: 'Papers and roadmap', body: 'The public record of what is being designed and in which order.' },
+      { title: 'Open to read', body: 'The base is published so the architecture can be inspected rather than described second-hand.' },
+      { title: 'A direction, stated', body: 'The wider data layer is an intention documented in the open.' }
+    ],
+    related: ['dk', 'dk-personal', 'dfm', 'daf'],
+    external: [
+      { label: 'Dknowledge repository', host: 'github.com/draykerdk/dknowledge', href: 'https://github.com/draykerdk/dknowledge' },
+      { label: 'Dknowledge base', host: 'dknowledge.drayker.org', href: 'https://dknowledge.drayker.org' }
+    ]
+  },
+  'dk-personal': {
+    label: 'Dk Personal', kicker: 'Dk expression · personal guide', title: 'Dk Personal — intelligence at the individual scale',
+    lead: 'Dk Personal is the individual expression of Dk: a guide and assistant that helps one person understand context, choose actions and evolve with intention.',
+    thesis: 'The global kernel becomes useful when it can meet one person without losing the wider system.',
+    role: 'Dk Personal applies the principles and capabilities of Dk Global to an individual context, connecting self-knowledge, daily direction and the larger Drayker architecture.',
+    body: 'Drayker’s own knowledge base distinguishes Dk Personal from the global kernel by centering individual interaction, self-knowledge and the direction of daily actions. It is not a separate intelligence disconnected from Dk Global; it is a personal interface and context where the same principles can be experienced at human scale.',
+    focus: [
+      { title: 'Context and memory', body: 'Personal knowledge and circumstances can stay connected so that guidance starts from the person rather than from an abstract system.' },
+      { title: 'Reflection and direction', body: 'The personal expression is meant to support understanding, choices and daily action without replacing the person\u2019s own agency.' },
+      { title: 'Bridge to the network', body: 'Dk Personal remains connected to Dk Global, Dknowledge, UID and DFM instead of becoming an isolated assistant.' }
+    ],
+    comLead: 'Dk Personal is the human-scale expression of the kernel: the same architecture, met by one person in their own context.',
+    comThesis: 'A distributed kernel that can still meet an individual.',
+    comRole: 'The individual-facing expression of Dk, connecting personal context and daily direction to the wider Drayker architecture.',
+    comBody: 'Drayker describes Dk at two scales. Dk Global is the shared kernel of the ecosystem; Dk Personal is how that same architecture is meant to reach a person \u2014 through context, self-knowledge and the direction of daily action. It is a described direction, not a released assistant.',
+    comFocus: [
+      { title: 'Same principles, human scale', body: 'The personal expression is not a separate intelligence, but the kernel meeting an individual context.' },
+      { title: 'Context first', body: 'Guidance is meant to start from the person rather than from an abstract system.' },
+      { title: 'Stated as a direction', body: 'This is documented architecture and intent, not a product with a release.' }
+    ],
+    related: ['dk', 'dknowledger', 'uid', 'dfm'],
+    external: []
+  },
+  'distributed-support': {
+    label: 'Distributed support', kicker: 'Ecosystem component · support layer', title: 'Distributed support — the connective layer',
+    lead: 'Distributed support describes the physical and virtual resources that allow people and machines to participate in the Drayker network.',
+    thesis: 'The network is only as open as the support that lets people enter it.',
+    role: 'This layer connects infrastructure, participation and access across the wider ecosystem.',
+    body: 'Support means the practical conditions around the protocol and the kernel: the resources, tools and interfaces that make distributed collaboration possible for people in different places and with different capabilities. This layer is part of the architecture map and has no repository of its own yet — writing down what it actually requires is open work.',
+    focus: [
+      { title: 'Access', body: 'Participation should not depend on one location, one device or one institution.' },
+      { title: 'Infrastructure', body: 'Physical and virtual resources support the systems and people that carry the work.' },
+      { title: 'Not yet specified', body: 'The layer is named in the ecosystem map; its requirements have not been documented in public.' }
+    ],
+    comLead: 'Distributed support is the layer of physical and virtual resources that lets people and machines take part in the Drayker network.',
+    comThesis: 'A network is only as open as the support that lets people enter it.',
+    comRole: 'The connective layer between the infrastructure of the ecosystem and the people who use it.',
+    comBody: 'Drayker treats access as part of the architecture rather than an operational afterthought: the resources, tools and interfaces that make distributed participation possible for people in different places. The layer appears in the ecosystem map; its detailed requirements are not published yet.',
+    comFocus: [
+      { title: 'Access', body: 'Participation should not depend on one location, one device or one institution.' },
+      { title: 'Infrastructure', body: 'The resources behind the systems and the people carrying the work.' },
+      { title: 'Early stage', body: 'Named in the map, not yet documented in detail.' }
+    ],
+    related: ['dk-network', 'bsdk', 'org'],
+    external: []
+  },
+  'open-science': {
+    label: 'Open science & health', kicker: 'Application domain', title: 'Open science & health — intelligence for life',
+    lead: 'Open science and health is an application domain where Dk, DFM and distributed collaboration can meet practical human needs.',
+    thesis: 'The system exists to make important work easier to understand, share and improve.',
+    role: 'This domain gives the kernel and the protocol a direction of service: open research, health knowledge and tools that can improve with collective intelligence.',
+    body: 'This is a future application domain built on open science and the Dk foundation. It is in the public map so the relationship between infrastructure and human use stays explicit \u2014 an ecosystem that only ever describes its own plumbing loses the reason it was built. No repository or paper is published for this domain yet.',
+    focus: [
+      { title: 'Open knowledge', body: 'Research and evidence can be shared in forms that others can inspect and extend.' },
+      { title: 'Human benefit', body: 'Technical infrastructure is connected to concrete improvements in people\u2019s lives.' },
+      { title: 'A direction, not a project', body: 'The domain is named as intent; no work has been published under it.' }
+    ],
+    comLead: 'Open science and health is an application domain for the Drayker system \u2014 where the kernel, the protocol and distributed collaboration meet practical human needs.',
+    comThesis: 'Infrastructure is worth building for what it enables.',
+    comRole: 'A direction of service for the platform: open research, health knowledge and tools that improve through collective intelligence.',
+    comBody: 'Drayker keeps this domain in its public map so that the purpose of the infrastructure stays visible alongside the architecture. It is a stated direction for future applications rather than an existing programme of work.',
+    comFocus: [
+      { title: 'Open knowledge', body: 'Research shared in forms others can inspect and extend.' },
+      { title: 'Human benefit', body: 'The point of the infrastructure, stated plainly.' },
+      { title: 'Future domain', body: 'A direction on the map, not a project under way.' }
+    ],
+    related: ['dk', 'dfm', 'uid'],
+    external: []
+  },
+  'value-unit': {
+    label: 'Value unit', kicker: 'Application domain · resources', title: 'Value unit — a language for shared value',
+    lead: 'Value unit describes an intelligent, autonomous unit for representing and distributing value across the ecosystem.',
+    thesis: 'Resources become more useful when their rules and movement are understandable.',
+    role: 'This concept connects DAF resource coordination to the identity, contribution and application layers of Drayker.',
+    body: 'The value-unit idea is in the public architecture because it explains how a federated ecosystem could account for resources without reducing every contribution to one central ledger or owner. The nearest published mechanism is DAF’s federative points; a value unit as such has no specification yet, and this page is where that gap is stated rather than hidden.',
+    focus: [
+      { title: 'Representation', body: 'Value described in relation to the work, resources and purposes that give it meaning.' },
+      { title: 'Distribution', body: 'Rules for moving resources stay visible to the units that depend on them.' },
+      { title: 'Unspecified', body: 'No public specification exists — the closest published mechanism is DAF’s federative points.' }
+    ],
+    comLead: 'The value unit is a concept for representing and distributing value across the federated ecosystem.',
+    comThesis: 'Resources become useful when their rules are legible.',
+    comRole: 'The link between the federation’s resource coordination and the identity, contribution and application layers.',
+    comBody: 'Drayker publishes this as part of its architecture so the question of resources is not left implicit. The federation already works with federative points; a broader value unit remains a concept under discussion rather than a defined mechanism.',
+    comFocus: [
+      { title: 'Beyond a single ledger', body: 'An ecosystem of autonomous units needs more than one central account.' },
+      { title: 'Connected to the federation', body: 'The idea extends how DAF already weighs contribution.' },
+      { title: 'Nothing specified yet', body: 'No specification is published.' }
+    ],
+    related: ['daf', 'uid', 'dk'],
+    external: []
+  }
+};
+
+const DK_PARTS = [
+  { name: 'BSDK', page: 'bsdk', href: 'https://bsdk.drayker.org', externalLabel: 'bsdk.drayker.org →',
+    desc: 'The DNA of the kernel — an intelligent, evolutionary base structure that enables Dk and the interaction, cooperation and feedback loop between humans and machines.' },
+  { name: 'Dk Network', page: 'dk-network', href: 'https://dknetwork.drayker.org', externalLabel: 'dknetwork.drayker.org →',
+    desc: 'A parallel internet built on Dk — distributed, secure, fail-safe and intelligent by construction.' },
+  { name: 'LCrypt', page: 'lcrypt', href: 'https://lc.drayker.org', externalLabel: 'lc.drayker.org →',
+    desc: 'Living Cryptography — an evolutionary encrypted tunnel that authenticates the system end to end. If authentication fails, the encryption itself changes.' },
+  { name: 'UID', page: 'uid', href: 'https://uid.drayker.org', externalLabel: 'uid.drayker.org →',
+    desc: 'Universal Identity — the identity layer and primary interface proposed for every application on the Drayker platform.' }
+];
+
+const DK_EXPRESSIONS = {
+  org: [
+    { name: 'Dk Global', kicker: 'Shared kernel', page: 'dk', action: 'Read the kernel page', desc: 'The shared strategic and technological core: architecture, components, dependencies and the project trail that makes cooperation possible.' },
+    { name: 'Dk Personal', kicker: 'Individual expression', page: 'dk-personal', action: 'Read the personal page', desc: 'The human-scale expression of Dk: personal context, self-knowledge and daily direction connected to the wider system.' }
+  ],
+  com: [
+    { name: 'Dk Global', kicker: 'Ecosystem-wide core', page: 'dk', action: 'Explore Dk Global', desc: 'The institutional view of the distributed kernel: the foundation that connects intelligence, organization and computing across Drayker.' },
+    { name: 'Dk Personal', kicker: 'Human-scale expression', page: 'dk-personal', action: 'Explore Dk Personal', desc: 'The individual view of Dk: a possible guide and assistant that brings the wider architecture into a person\u2019s context.' }
+  ]
+};
+
+const DK_CONNECTIONS = {
+  org: [
+    { name: 'DFM / DFMP', relation: 'METHOD + PROPOSAL PATH', page: 'dfm', action: 'Read the protocol', desc: 'DFM breaks work into functions and DFMP gives proposals a documented path for discussion, review and adoption.' },
+    { name: 'Dknowledge', relation: 'KNOWLEDGE + COORDINATION', page: 'dknowledger', action: 'Read the knowledge layer', desc: 'Dknowledge keeps the kernel\u2019s vision, architecture, projects and decisions connected so contributors can act with context.' },
+    { name: 'DAF', relation: 'COOPERATION + ORGANIZATION', page: 'daf', action: 'Read the federation', desc: 'DAF is the organizational link between autonomous units, shared resources and the cooperation that carries the ecosystem.' },
+    { name: 'UID', relation: 'IDENTITY + APPLICATIONS', page: 'uid', action: 'Read the identity layer', desc: 'UID connects participants, contribution and applications to the systems built on the Dk foundation.' },
+    { name: 'Dk Personal', relation: 'INDIVIDUAL CONTEXT', page: 'dk-personal', action: 'Read the personal expression', desc: 'Dk Personal brings the global architecture into individual interaction, self-knowledge and daily direction.' }
+  ],
+  com: [
+    { name: 'DFM / DFMP', relation: 'OPERATING METHOD', page: 'dfm', action: 'See the method', desc: 'The method and proposal process that explain how Drayker models work, distributes functions and validates decisions.' },
+    { name: 'Dknowledge', relation: 'KNOWLEDGE LAYER', page: 'dknowledger', action: 'See the knowledge layer', desc: 'The connected memory that gives the architecture, projects and institutional story a traceable context.' },
+    { name: 'DAF', relation: 'FEDERATED ORGANIZATION', page: 'daf', action: 'See the federation', desc: 'The organizational model for cooperation between autonomous units and coordination of shared resources.' },
+    { name: 'UID', relation: 'APPLICATION INTERFACE', page: 'uid', action: 'See the identity layer', desc: 'The proposed identity and application-facing layer through which people and services can meet the wider platform.' },
+    { name: 'Dk Personal', relation: 'HUMAN-SCALE EXPRESSION', page: 'dk-personal', action: 'See the personal expression', desc: 'The individual expression that makes the relationship between the global kernel and a person explicit.' }
+  ]
+};
+
+const ECO = [
+  { layer: 'KERNEL', name: 'Dk Global', page: 'dk', filter: 'kernel', desc: 'The strategic and technological core connecting distributed intelligence, organization and computing across Drayker.' },
+  { layer: 'KERNEL', name: 'BSDK', page: 'bsdk', filter: 'kernel', desc: 'Base structure for system construction and massively distributed networks. The DNA of the kernel.' },
+  { layer: 'NETWORK', name: 'Dk Network', page: 'dk-network', filter: 'kernel', desc: 'A parallel internet: distributed, secure, fail-safe and intelligent by construction.' },
+  { layer: 'SECURITY', name: 'LCrypt', page: 'lcrypt', filter: 'kernel', desc: 'Encrypted, evolutionary network tunnel that authenticates and protects the distributed computing system supporting the whole platform.' },
+  { layer: 'PLATFORM', name: 'UID', page: 'uid', filter: 'platform', desc: 'Universal identity and super app — the basis of every application on the platform.' },
+  { layer: 'PLATFORM', name: 'Distributed support', page: 'distributed-support', filter: 'platform', desc: 'Physical and virtual distributed support for the people and machines running the network.' },
+  { layer: 'PROTOCOL', name: 'DFM / DFMP', page: 'dfm', filter: 'protocol', desc: 'The collaboration paradigm and the proposal process every project and motion for resolution is built with.' },
+  { layer: 'PROTOCOL', name: 'MetaDFMP', page: 'metadfmp', filter: 'protocol', desc: 'A modeling, training and testing layer for DFM intelligence and artificial intelligence.' },
+  { layer: 'ORGANIZATION', name: 'DAF', page: 'daf', filter: 'org', desc: 'The federation model connecting Drayker DAOs, DACs, projects and initiatives.' },
+  { layer: 'ORGANIZATION', name: 'Emergence Initiative', page: 'emergence', filter: 'org', desc: 'An open edge for papers, proposals and collaboration that need a place to emerge.' },
+  { layer: 'KNOWLEDGE', name: 'Dknowledge', page: 'dknowledger', filter: 'platform', desc: 'The connected knowledge and coordination layer around Drayker\u2019s architecture and work.' },
+  { layer: 'PERSONAL', name: 'Dk Personal', page: 'dk-personal', filter: 'personal', desc: 'The individual expression of Dk: a guide and assistant connected to personal context, Dknowledge and the wider kernel.' },
+  { layer: 'APPLICATION', name: 'Open science & health', page: 'open-science', filter: 'apps', desc: 'An application domain for Dk, DFM and open science to meet practical human needs.' },
+  { layer: 'APPLICATION', name: 'Value unit', page: 'value-unit', filter: 'apps', desc: 'A resource and value-distribution concept for the federated ecosystem.' }
+];
+
+const ECO_FILTERS = [
+  { id: 'all', label: 'ALL' }, { id: 'protocol', label: 'PROTOCOL' }, { id: 'kernel', label: 'KERNEL' },
+  { id: 'platform', label: 'PLATFORM' }, { id: 'personal', label: 'PERSONAL' }, { id: 'org', label: 'ORGANIZATION' }, { id: 'apps', label: 'APPLICATIONS' }
+];
+
+const ORG_UNITS = [
+  { name: 'DAF', page: 'daf', kind: 'DECENTRALIZED AUTONOMOUS FEDERATION', href: 'https://github.com/draykerdk/daf', link: 'github.com/draykerdk/daf →',
+    desc: 'The non-profit federation that manages resources and forms the alliance basis between all Drayker DAOs and DACs.' },
+  { name: 'DAOs & DACs', page: 'daf', kind: 'AUTONOMOUS UNITS', href: 'https://github.com/draykerdk/daf', link: 'How a unit links →',
+    desc: 'Each project, team or initiative organizes itself as an autonomous unit linked to the federation, with its own scope and its own decisions.' },
+  { name: 'Councils', page: 'dfm', kind: 'ADVISORY & VALIDATION', href: 'https://dfmp.drayker.org', link: 'How validation works →',
+    desc: 'Advisers are groups that discuss and validate papers alongside the communities, depending on the purpose of each proposal.' },
+  { name: 'DFMP', page: 'dfm', kind: 'PROPOSAL PROCESS', href: 'https://github.com/draykerdk/dfmp', link: 'The process →',
+    desc: 'The formal path a proposal takes from an issue thread to a legitimated paper on master.' },
+  { name: 'Volunteers portal', page: 'join', kind: 'PEOPLE', href: 'https://github.com/draykerdk/drayker.org', link: 'This site’s repository →',
+    desc: 'Where new collaborators arrive, find open functions and enter the ecosystem. Our work is primarily voluntary.' }
+];
+
+// The open-functions board is read live from the public GitHub issues of the draykerdk
+// organization — an issue becomes an open function when it carries the `open-function`
+// label. Optional labels refine a row: `skill:*` drives the filters, `level:*` the badge,
+// `effort:*` the estimate. Nothing here is hand-written; if the search returns nothing,
+// the board says so instead of showing examples.
+const FN_ENDPOINT = 'https://api.github.com/search/issues?q=' +
+  encodeURIComponent('org:draykerdk is:issue is:open label:open-function') +
+  '&sort=created&order=desc&per_page=50';
+
+const FN_FILTERS = [
+  { id: 'all', label: 'ALL' }, { id: 'code', label: 'CODE' }, { id: 'research', label: 'RESEARCH' },
+  { id: 'design', label: 'DESIGN' }, { id: 'docs', label: 'DOCUMENTATION' },
+  { id: 'translation', label: 'TRANSLATION' }, { id: 'governance', label: 'GOVERNANCE' }
+];
+
+const FN_SKILLS = FN_FILTERS.filter((f) => f.id !== 'all').map((f) => f.id);
+
+const fnLabelValue = (labels, prefix) => {
+  for (const l of labels) {
+    const name = (l && l.name ? l.name : '').toLowerCase();
+    if (name.indexOf(prefix) === 0) return name.slice(prefix.length);
+  }
+  return '';
+};
+
+const fnMapIssue = (issue) => {
+  const labels = issue.labels || [];
+  const repo = (issue.repository_url || '').split('/').pop() || 'draykerdk';
+  const skill = fnLabelValue(labels, 'skill:');
+  const level = fnLabelValue(labels, 'level:');
+  const effort = fnLabelValue(labels, 'effort:');
+  const filter = FN_SKILLS.indexOf(skill) >= 0 ? skill : 'other';
+  const skillLabel = skill ? skill.charAt(0).toUpperCase() + skill.slice(1) : 'Open';
+  return {
+    key: issue.id,
+    id: '#' + issue.number,
+    title: issue.title,
+    meta: skillLabel + ' · ' + repo,
+    level: (level || 'open').toUpperCase(),
+    effort: effort || '—',
+    filter: filter,
+    href: issue.html_url
+  };
+};
+
+// One row per published documentation site, with the state of that documentation stated
+// plainly. A reader should never click through expecting a specification and land on a
+// paragraph. `state` is updated as each site is actually written.
+const DOCS = [
+  { tag: 'PROTOCOL', name: 'DFMP', host: 'dfmp.drayker.org', href: 'https://dfmp.drayker.org',
+    desc: 'The distributed function modularization / modeling protocol, its principles and the path a proposal takes.',
+    state: 'The protocol and the proposal path are written; the DFMP-000 process paper itself is still only a title.' },
+  { tag: 'KNOWLEDGE', name: 'Dknowledge', host: 'dknowledge.drayker.org', href: 'https://dknowledge.drayker.org',
+    desc: 'The knowledge base: papers organised by main project, the roadmap index and the contribution guide.',
+    state: 'The most complete documentation in the ecosystem — start here.' },
+  { tag: 'KERNEL', name: 'Dk', host: 'dk.drayker.org', href: 'https://dk.drayker.org',
+    desc: 'The distributed kernel: motions for resolution on Dk itself, plus the ethics note.',
+    state: 'Summary only. The motions are referenced but not yet published.' },
+  { tag: 'KERNEL', name: 'BSDK', host: 'bsdk.drayker.org', href: 'https://bsdk.drayker.org',
+    desc: 'Base Structure DK — DNA Kernel FM. Motions for resolution on the kernel base structure.',
+    state: 'Summary only.' },
+  { tag: 'NETWORK', name: 'Dk Network', host: 'dknetwork.drayker.org', href: 'https://dknetwork.drayker.org',
+    desc: 'The parallel network built on Dk and the requirements it has to satisfy.',
+    state: 'Requirements listed in the repository; the Initial Network Architecture is not published.' },
+  { tag: 'SECURITY', name: 'Living Cryptography', host: 'lc.drayker.org', href: 'https://lc.drayker.org',
+    desc: 'Authentication, uPOW and adaptive encryption across the distributed system.',
+    state: 'The proposal is described in the repository; the docs site is a summary.' },
+  { tag: 'IDENTITY', name: 'UID', host: 'uid.drayker.org', href: 'https://uid.drayker.org',
+    desc: 'Universal Identity Drayker — the identity layer and primary interface for platform applications.',
+    state: 'Design direction and open discussion; no specification yet.' },
+  { tag: 'ORGANIZATION', name: 'DAF', host: 'daf.drayker.org', href: 'https://daf.drayker.org',
+    desc: 'Decentralized Autonomous Federation — how units link, how resources are asked for and decided.',
+    state: 'The federation rules are stated; the contract and point mechanics are not specified.' },
+  { tag: 'RESEARCH', name: 'MetaDFMP', host: 'metadfmp.drayker.org', href: 'https://metadfmp.drayker.org',
+    desc: 'Modeling, training and testing of DFM intelligence with artificial intelligence.',
+    state: 'A statement of purpose. This is the emptiest layer of the system and it is documented as such.' },
+  { tag: 'OPEN EDGE', name: 'Emergence Initiative', host: 'ei.drayker.org', href: 'https://ei.drayker.org',
+    desc: 'Where papers and proposals outside the core models are handled.',
+    state: 'Open and explicitly asking for suggestions.' },
+  { tag: 'PROJECTS', name: 'DFMPProject', host: 'dfmpproject.drayker.org', href: 'https://dfmpproject.drayker.org',
+    desc: 'Models for proposing a voluntary, collaborative project through DFM.',
+    state: 'Summary only.' },
+  { tag: 'REPOSITORIES', name: 'All Drayker repositories', host: 'github.com/draykerdk', href: 'https://github.com/draykerdk',
+    desc: 'Every project, paper and protocol in the open, with its own license and history.',
+    state: 'The source of truth behind every page on this site.' }
+];
+
+const VOLUNTEER_ISSUE_BASE = 'https://github.com/draykerdk/drayker.org/issues/new';
+
+const SKILLS = ['Code', 'Research', 'Design', 'Documentation', 'Translation', 'Governance', 'Outreach', 'Not sure yet'];
+const HOURS = ['1–3', '4–8', '9–15', '15+'];
+
+const NAV_COM = [
+  { id: 'manifesto', label: 'Manifesto' }, { id: 'dk', label: 'Dk' }, { id: 'dfm', label: 'DFM' },
+  { id: 'eco', label: 'Ecosystem' }, { id: 'org', label: 'Organization' }, { id: 'docs', label: 'Docs' }
+];
+const NAV_ORG = [
+  { id: 'fn', label: 'Open functions' }, { id: 'dfm', label: 'DFM' }, { id: 'org', label: 'Organization' },
+  { id: 'eco', label: 'Ecosystem' }, { id: 'docs', label: 'Docs' }, { id: 'manifesto', label: 'Manifesto' }
+];
+
+const ROUTE_PAGES = new Set([
+  'home', 'manifesto', 'dfm', 'dk', 'eco', 'org', 'fn', 'docs', 'join',
+  ...Object.keys(PROJECT_PAGES)
+]);
+const OTHER_SITE = SITE === 'org' ? 'com' : 'org';
+
+// Participation lives on the volunteers portal, not on the institutional site. On the .com
+// build these two screens are not rendered — they are handed to drayker.org, so there is
+// only ever one place to take a function or apply.
+const PORTAL_ONLY = SITE === 'com' ? ['fn', 'join'] : [];
+
+// A hash naming the other presentation is not rendered here — it is forwarded to the
+// domain that owns it, keeping older `#com/...` and `#org/...` links alive after the split.
+const crossSiteHref = (page) => CROSS_SITE_URL + '/#' + OTHER_SITE + '/' + (page || 'home');
+
+const readRoute = () => {
+  if (typeof window === 'undefined') return { site: SITE, page: 'home' };
+  const [site, page] = window.location.hash.replace(/^#/, '').split('/');
+  const known = ROUTE_PAGES.has(page) ? page : 'home';
+  if (site === OTHER_SITE || PORTAL_ONLY.indexOf(known) >= 0) return { site: SITE, page: known, handOver: true };
+  return { site: SITE, page: known };
+};
+
+class Component extends DCLogic {
+  initialRoute = readRoute();
+  state = {
+    site: this.initialRoute.site, page: this.initialRoute.page, dfm: 0, ecoF: 'all', fnF: 'all',
+    fnStatus: 'idle', fnItems: [],
+    name: '', contact: '', why: '', skills: [], hours: '', sent: false, sentName: '', issueUrl: ''
+  };
+
+  get site() { return SITE; }
+
+  markRef = React.createRef();
+  shadowRef = React.createRef();
+  ringOverRef = React.createRef();
+  ringOutRef = React.createRef();
+  ringBackRef = React.createRef();
+  gaze = { x: 0, y: 0.42 };
+  gazeT = { x: 0, y: 0.42 };
+
+  // ============================================================================
+  // MARK PHYSICS — draws the ring as if it were two tilted metal hoops orbiting
+  // the sphere, redrawn every frame from a single "gaze" direction (gx, gy).
+  //
+  // Model: the ring is two identical great-circles of radius RR=118, both tilted
+  // by the same angle (0.733 rad / 42°) around a unit vector w = the gaze point
+  // on the sphere (w.z solved so |w|=1 — it's the point on the front hemisphere
+  // the "eye" is looking at). u1/u2 build an orthonormal frame around w; vs[0]/
+  // vs[1] are that frame rotated ±42° around w — the two planes the ring hoops
+  // sit in (this is what makes them look like a crossed double ring, like an
+  // armillary sphere / gyroscope, that reorients as the gaze moves).
+  //
+  // pt(v, t) walks one hoop: a point at angle t around the circle in plane v.
+  // For ~220 samples per hoop we classify each point by depth/radius:
+  //   'over' — in front of the sphere (z>0) but projecting INSIDE the sphere's
+  //            silhouette (radius < R) — would be hidden by the ball; drawn as
+  //            a soft overlay stroke (ringOverRef) so the ring reads as passing
+  //            through/around the ball rather than just floating in front.
+  //   'out'  — in front of the sphere AND outside its silhouette — the normal,
+  //            fully visible ring arcs (ringOutRef, gradient dkring).
+  //   'back' — behind the sphere (z<0, radius > R) — dimmer arcs (ringBackRef).
+  // Consecutive same-class samples are joined into one SVG path per run.
+  //
+  // The shadow wedge (shadowRef) is built separately: from the gaze point P,
+  // ray-march outward along both hoops (rays[]) until each ray crosses the ball
+  // radius R, binary-search the exact crossing point (hit()), then stitch the
+  // four crossing points plus the arc between them into one dark "night side"
+  // patch. This is what makes the shadow terminator rotate correctly with gaze.
+  // ============================================================================
+  markGeom(gx, gy) {
+    const R = 100, RR = 118, CA = Math.cos(0.733), SA = Math.sin(0.733);
+    const wz = Math.sqrt(Math.max(0.25, 1 - gx * gx - gy * gy));
+    const w = [gx, gy, wz];
+    let u1 = [1 - w[0] * w[0], -w[0] * w[1], -w[0] * w[2]];
+    const n1 = Math.hypot(u1[0], u1[1], u1[2]) || 1;
+    u1 = [u1[0] / n1, u1[1] / n1, u1[2] / n1];
+    const u2 = [w[1] * u1[2] - w[2] * u1[1], w[2] * u1[0] - w[0] * u1[2], w[0] * u1[1] - w[1] * u1[0]];
+    const vs = [
+      [CA * u1[0] + SA * u2[0], CA * u1[1] + SA * u2[1], CA * u1[2] + SA * u2[2]],
+      [CA * u1[0] - SA * u2[0], CA * u1[1] - SA * u2[1], CA * u1[2] - SA * u2[2]]
+    ];
+    const pt = (v, t) => {
+      const c = Math.cos(t), s = Math.sin(t);
+      return [RR * (w[0] * c + v[0] * s), RR * (w[1] * c + v[1] * s), RR * (w[2] * c + v[2] * s)];
+    };
+    const f = (n) => Math.round(n * 10) / 10;
+
+    const segs = { over: [], out: [], back: [] };
+    for (const v of vs) {
+      let cur = null, kind = '', prev = null;
+      const N = 220;
+      for (let i = 0; i <= N; i++) {
+        const p = pt(v, i / N * Math.PI * 2);
+        const r = Math.hypot(p[0], p[1]);
+        const k = p[2] > 0 ? (r < R ? 'over' : 'out') : (r > R ? 'back' : '');
+        if (k !== kind) {
+          if (k) {
+            const s = prev || p;
+            cur = ['M ' + f(s[0]) + ' ' + f(s[1]), 'L ' + f(p[0]) + ' ' + f(p[1])];
+            segs[k].push(cur);
+          }
+          kind = k;
+        } else if (k) cur.push('L ' + f(p[0]) + ' ' + f(p[1]));
+        prev = p;
+      }
+    }
+
+    const P = [RR * w[0], RR * w[1]];
+    const hit = (a, b) => {
+      let lo = 0, hi = 1;
+      for (let i = 0; i < 14; i++) {
+        const m = (lo + hi) / 2;
+        const x = a[0] + (b[0] - a[0]) * m, y = a[1] + (b[1] - a[1]) * m;
+        if (Math.hypot(x, y) < R) lo = m; else hi = m;
+      }
+      return [a[0] + (b[0] - a[0]) * lo, a[1] + (b[1] - a[1]) * lo];
+    };
+    const rays = [];
+    for (let ri = 0; ri < 2; ri++) for (const sg of [1, -1]) {
+      const seq = [];
+      let prev = P, end = null;
+      for (let k = 1; k <= 140; k++) {
+        const p = pt(vs[ri], sg * k * 0.0209);
+        if (Math.hypot(p[0], p[1]) >= R) { end = hit(prev, p); break; }
+        seq.push([p[0], p[1]]);
+        prev = [p[0], p[1]];
+      }
+      if (!end) {
+        const m = Math.hypot(prev[0], prev[1]) || 1;
+        end = [prev[0] / m * R, prev[1] / m * R];
+      }
+      rays.push({ sg: sg, seq: seq, end: end, psi: Math.atan2(end[1], end[0]) });
+    }
+    rays.sort((a, b) => a.psi - b.psi);
+
+    const inArc = (from, to, q) => {
+      let s = to - from; if (s < 0) s += Math.PI * 2;
+      let d2 = q - from; if (d2 < 0) d2 += Math.PI * 2;
+      return d2 <= s;
+    };
+    const dark = [];
+    for (let i = 0; i < 4; i++) {
+      const a = rays[i], b = rays[(i + 1) % 4];
+      if (inArc(a.psi, b.psi, -Math.PI / 2) || inArc(a.psi, b.psi, Math.PI / 2)) dark.push(i);
+    }
+    const useTB = dark.length === 2 && (dark[1] - dark[0]) % 2 === 0;
+
+    let dsh = '';
+    for (let i = 0; i < 4; i++) {
+      const a = rays[i], b = rays[(i + 1) % 4];
+      if (useTB ? dark.indexOf(i) < 0 : a.sg === b.sg) continue;
+      let span = b.psi - a.psi;
+      if (span < 0) span += Math.PI * 2;
+      dsh += 'M ' + f(P[0]) + ' ' + f(P[1]) + ' ';
+      for (const q of a.seq) dsh += 'L ' + f(q[0]) + ' ' + f(q[1]) + ' ';
+      dsh += 'L ' + f(a.end[0]) + ' ' + f(a.end[1]) + ' A ' + R + ' ' + R + ' 0 ' + (span > Math.PI ? 1 : 0) + ' 1 ' + f(b.end[0]) + ' ' + f(b.end[1]) + ' ';
+      for (let k = b.seq.length - 1; k >= 0; k--) dsh += 'L ' + f(b.seq[k][0]) + ' ' + f(b.seq[k][1]) + ' ';
+      dsh += 'Z ';
+    }
+    const join = (a) => a.map((s) => s.join(' ')).join(' ');
+    return { shadow: dsh, over: join(segs.over), out: join(segs.out), back: join(segs.back) };
+  }
+
+  paintMark() {
+    const g = this.markGeom(this.gaze.x, this.gaze.y);
+    const set = (ref, d) => { if (ref.current) ref.current.setAttribute('d', d); };
+    set(this.shadowRef, g.shadow);
+    set(this.ringOverRef, g.over);
+    set(this.ringOutRef, g.out);
+    set(this.ringBackRef, g.back);
+  }
+
+  // ============================================================================
+  // GAZE ANIMATION — drives markGeom() above every frame.
+  // onGaze (pointermove): converts cursor position into a normalized gaze
+  // target (gazeT), relative to the mark's own bounding box, clamped to radius
+  // 0.5 so the ring never spins fully edge-on.
+  // Idle drift: if the pointer hasn't moved for 2.4s, the target instead follows
+  // a slow combined sine/cosine (Lissajous-like) path, so the mark keeps a
+  // gentle life of its own when nobody is interacting.
+  // Each animation frame eases the live gaze 6% of the way toward the target
+  // (exponential smoothing/lerp) and, if it moved enough, calls paintMark() to
+  // recompute + re-set the path 'd' attributes directly on the SVG refs (no
+  // React re-render needed — keeps this at 60fps).
+  // ============================================================================
+  componentDidMount() {
+    this.onRouteChange = () => {
+      const route = readRoute();
+      if (route.handOver) { this.handOver(route.page); return; }
+      this.setState({ site: SITE, page: route.page });
+      window.scrollTo(0, 0);
+      if (route.page === 'fn') this.loadFunctions();
+    };
+    if (this.initialRoute.handOver) this.handOver(this.initialRoute.page);
+    if (this.state.page === 'fn') this.loadFunctions();
+    window.addEventListener('popstate', this.onRouteChange);
+    window.addEventListener('hashchange', this.onRouteChange);
+    this.lastMove = -9999;
+    this.onGaze = (ev) => {
+      const el = this.markRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (!r.width) return;
+      const k = r.width * 0.66;
+      let gx = (ev.clientX - (r.left + r.width / 2)) / k;
+      let gy = (ev.clientY - (r.top + r.height / 2)) / k;
+      const m = Math.hypot(gx, gy);
+      if (m > 0.5) { gx = gx / m * 0.5; gy = gy / m * 0.5; }
+      this.gazeT = { x: gx, y: gy };
+      this.lastMove = performance.now();
+    };
+    window.addEventListener('pointermove', this.onGaze, { passive: true });
+    const tick = () => {
+      const now = performance.now();
+      let t = this.gazeT;
+      if (now - this.lastMove > 2400) {
+        const s = now / 1000;
+        t = { x: Math.sin(s * 0.23) * 0.22 + Math.sin(s * 0.07) * 0.06, y: 0.34 + Math.cos(s * 0.17) * 0.17 };
+      }
+      const nx = this.gaze.x + (t.x - this.gaze.x) * 0.06;
+      const ny = this.gaze.y + (t.y - this.gaze.y) * 0.06;
+      if (Math.abs(nx - this.gaze.x) > 0.0002 || Math.abs(ny - this.gaze.y) > 0.0002) {
+        this.gaze = { x: nx, y: ny };
+        this.paintMark();
+      }
+      this.raf = requestAnimationFrame(tick);
+    };
+    this.paintMark();
+    this.raf = requestAnimationFrame(tick);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener('pointermove', this.onGaze);
+    window.removeEventListener('popstate', this.onRouteChange);
+    window.removeEventListener('hashchange', this.onRouteChange);
+  }
+
+  componentDidUpdate() { this.paintMark(); }
+
+  // Fetched once per page load, and only when the board is actually opened — a visitor who
+  // never looks at the open functions never causes a request. A failure is not hidden: the
+  // board falls back to the same honest empty state, never to invented rows.
+  loadFunctions = () => {
+    if (this.state.fnStatus === 'loading' || this.state.fnStatus === 'ready') return;
+    if (typeof fetch !== 'function') { this.setState({ fnStatus: 'error' }); return; }
+    this.setState({ fnStatus: 'loading' });
+    fetch(FN_ENDPOINT, { headers: { Accept: 'application/vnd.github+json' } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+      .then((data) => {
+        const items = (data && data.items ? data.items : []).map(fnMapIssue);
+        this.setState({ fnStatus: 'ready', fnItems: items });
+      })
+      .catch(() => this.setState({ fnStatus: 'error', fnItems: [] }));
+  };
+
+  // The volunteer form has no server behind it and never will: it composes a GitHub issue
+  // and hands it to the person to read, edit and publish under their own account. Nothing
+  // leaves this page on its own, and no contact detail is transmitted anywhere by us.
+  submitApplication = () => {
+    const s = this.state;
+    const lines = [
+      '### Where I can help',
+      s.skills.length ? s.skills.join(', ') : '_not stated_',
+      '',
+      '### Hours a week I can give',
+      s.hours ? s.hours + ' h' : '_not stated_',
+      '',
+      '### What draws me to Drayker',
+      s.why.trim() || '_not stated_',
+      ''
+    ];
+    if (s.contact.trim()) lines.push('### Where to find me', s.contact.trim(), '');
+    lines.push('---', 'Drafted on drayker.org. This issue is published by its author; the site transmits nothing on its own.');
+    const title = 'Volunteer: ' + (s.name.trim() || 'new collaborator');
+    const url = VOLUNTEER_ISSUE_BASE +
+      '?labels=volunteer&title=' + encodeURIComponent(title) +
+      '&body=' + encodeURIComponent(lines.join('\n'));
+    if (typeof window !== 'undefined') window.open(url, '_blank', 'noopener');
+    this.setState({ sent: true, sentName: (s.name.trim() || 'volunteer').split(' ')[0], issueUrl: url });
+  };
+
+  routeTo = (site, page, replace = false) => {
+    if (page === 'fn') this.loadFunctions();
+    if (typeof window !== 'undefined') {
+      const hash = `#${site}/${page}`;
+      const url = `${window.location.pathname}${window.location.search}${hash}`;
+      const method = replace ? 'replaceState' : 'pushState';
+      if (window.location.hash !== hash) window.history[method]({ site, page }, '', url);
+      window.scrollTo(0, 0);
+    }
+    this.setState({ site, page });
+  };
+
+  go = (page) => () => (PORTAL_ONLY.indexOf(page) >= 0 ? this.crossTo(page) : this.routeTo(SITE, page));
+
+  // handOver answers a route that this deployment does not own (replace: the visitor never
+  // meant to land here, so it should not sit in their history). crossTo answers a click.
+  handOver = (page) => {
+    if (typeof window !== 'undefined') window.location.replace(crossSiteHref(page));
+  };
+
+  crossTo = (page) => {
+    if (typeof window !== 'undefined') window.location.href = crossSiteHref(page);
+  };
+
+  toggleSite = () => this.crossTo('home');
+
+  chip = (active) => active
+    ? { bd: '#FF5500', bg: '#FF5500', fg: '#08080A' }
+    : { bd: '#222230', bg: 'transparent', fg: '#8585A0' };
+
+  diagram() {
+    const e = React.createElement;
+    const mono = { fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fill: '#6A6A80', textAnchor: 'middle' };
+    const svg = (children) => e('svg', { viewBox: '0 0 340 200', style: { width: '100%', maxWidth: 380, height: 'auto', display: 'block' } }, children);
+    const i = this.state.dfm;
+    if (i === 0) return svg([
+      e('circle', { key: 'a', cx: 170, cy: 100, r: 76, fill: 'none', stroke: '#222230' }),
+      e('circle', { key: 'b', cx: 170, cy: 100, r: 52, fill: 'none', stroke: '#2C2C42' }),
+      e('circle', { key: 'c', cx: 170, cy: 100, r: 28, fill: 'none', stroke: A }),
+      e('circle', { key: 'd', cx: 170, cy: 100, r: 7, fill: A }),
+      e('line', { key: 'e', x1: 94, y1: 100, x2: 246, y2: 100, stroke: '#222230', strokeDasharray: '3 5' }),
+      e('line', { key: 'f', x1: 170, y1: 24, x2: 170, y2: 176, stroke: '#222230', strokeDasharray: '3 5' }),
+      e('text', { key: 'g', x: 170, y: 194, ...mono }, 'BAYESIAN MODEL · INITIAL STRATEGY')
+    ]);
+    if (i === 1) return svg([
+      e('rect', { key: 'a', x: 24, y: 64, width: 74, height: 74, fill: 'none', stroke: '#2C2C42' }),
+      e('line', { key: 'b', x1: 108, y1: 101, x2: 146, y2: 101, stroke: A }),
+      e('g', { key: 'c', fill: 'none', stroke: A }, [0, 1, 2].flatMap((r) => [0, 1, 2].map((c) =>
+        e('rect', { key: r + '-' + c, x: 160 + c * 40, y: 54 + r * 40, width: 30, height: 30 })))),
+      e('text', { key: 'd', x: 61, y: 52, ...mono }, 'ISSUE'),
+      e('text', { key: 'e', x: 215, y: 186, ...mono }, 'SMALL FUNCTIONS')
+    ]);
+    if (i === 2) {
+      const pts = [[60, 46], [280, 46], [40, 120], [300, 120], [106, 166], [234, 166]];
+      return svg([
+        e('g', { key: 'l', stroke: '#2C2C42' }, pts.map((p, k) => e('line', { key: k, x1: 170, y1: 100, x2: p[0], y2: p[1] }))),
+        e('rect', { key: 'r', x: 152, y: 82, width: 36, height: 36, fill: A }),
+        e('g', { key: 'n', fill: '#0C0C0F', stroke: A }, pts.map((p, k) => e('circle', { key: k, cx: p[0], cy: p[1], r: 11 }))),
+        e('text', { key: 't', x: 170, y: 194, ...mono }, 'DISTRIBUTED AMONG COLLABORATORS')
+      ]);
+    }
+    if (i === 3) return svg([
+      e('g', { key: 'a', fill: 'none', stroke: '#2C2C42' }, [
+        e('circle', { key: '1', cx: 80, cy: 70, r: 20 }),
+        e('circle', { key: '2', cx: 260, cy: 70, r: 20 }),
+        e('circle', { key: '3', cx: 170, cy: 146, r: 20 })
+      ]),
+      e('g', { key: 'b', stroke: A }, [
+        e('line', { key: '1', x1: 100, y1: 70, x2: 240, y2: 70 }),
+        e('line', { key: '2', x1: 88, y1: 88, x2: 152, y2: 132 }),
+        e('line', { key: '3', x1: 252, y1: 88, x2: 188, y2: 132 })
+      ]),
+      e('g', { key: 'c', fill: A }, [
+        e('circle', { key: '1', cx: 170, cy: 70, r: 4 }),
+        e('circle', { key: '2', cx: 120, cy: 110, r: 4 }),
+        e('circle', { key: '3', cx: 220, cy: 110, r: 4 })
+      ]),
+      e('text', { key: 'd', x: 170, y: 194, ...mono }, 'DECENTRALIZED PEER REVIEW')
+    ]);
+    return svg([
+      e('line', { key: 'a', x1: 30, y1: 150, x2: 310, y2: 150, stroke: '#2C2C42' }),
+      e('line', { key: 'b', x1: 90, y1: 62, x2: 250, y2: 62, stroke: A }),
+      e('line', { key: 'c', x1: 90, y1: 150, x2: 90, y2: 62, stroke: A }),
+      e('line', { key: 'd', x1: 250, y1: 62, x2: 250, y2: 150, stroke: A }),
+      e('g', { key: 'e', fill: '#0C0C0F', stroke: A }, [
+        e('circle', { key: '1', cx: 140, cy: 62, r: 7 }),
+        e('circle', { key: '2', cx: 200, cy: 62, r: 7 })
+      ]),
+      e('circle', { key: 'f', cx: 250, cy: 150, r: 8, fill: A }),
+      e('text', { key: 'g', x: 170, y: 46, ...mono }, 'COMMUNITY REVIEW BRANCH'),
+      e('text', { key: 'h', x: 170, y: 176, ...mono }, 'MASTER · LEGITIMATED PAPER')
+    ]);
+  }
+
+  renderVals() {
+    const s = this.state, p = s.page, org = this.site === 'org';
+    const step = STEPS[s.dfm];
+    const project = PROJECT_PAGES[p] || null;
+    const projectView = project ? {
+      ...project,
+      kicker: org ? project.kicker : `Institutional overview · ${project.label}`,
+      lead: org ? project.lead : (project.comLead || project.lead),
+      role: org ? project.role : (project.comRole || project.role),
+      thesis: org ? project.thesis : (project.comThesis || project.thesis),
+      body: org ? project.body : (project.comBody || project.body),
+      focus: org ? project.focus : (project.comFocus || project.focus)
+    } : null;
+    const projectRelations = projectView
+      ? projectView.related.map((slug) => ({ label: PUBLIC_LABELS[slug] || slug, onClick: this.go(slug) }))
+      : [];
+    const projectExternalLinks = projectView ? projectView.external : [];
+    const fnRows = s.fnItems.filter((r) => s.fnF === 'all' || r.filter === s.fnF);
+
+    const nav = (org ? NAV_ORG : NAV_COM).map((n) => ({
+      label: n.label, onClick: this.go(n.id),
+      current: p === n.id ? 'page' : undefined,
+      color: p === n.id ? '#EDECF0' : '#8585A0',
+      line: p === n.id ? A : 'transparent'
+    }));
+
+    return {
+      markRef: this.markRef,
+      shadowRef: this.shadowRef,
+      ringOverRef: this.ringOverRef,
+      ringOutRef: this.ringOutRef,
+      ringBackRef: this.ringBackRef,
+      domain: org ? 'drayker.org' : 'drayker.com',
+      switchLabel: org ? 'GO TO .COM' : 'GO TO .ORG',
+      switchAriaLabel: org ? 'Go to drayker.com, the institutional site' : 'Go to drayker.org, the volunteers portal',
+      crossSiteUrl: crossSiteHref('home'),
+      joinHref: org ? '#org/join' : crossSiteHref('join'),
+      joinLabel: org ? 'Volunteer' : 'Volunteer →',
+      toggleSite: this.toggleSite,
+      nav, pageKey: SITE,
+
+      isHome: p === 'home', isManifesto: p === 'manifesto', isDfm: p === 'dfm', isDk: p === 'dk',
+      isEco: p === 'eco', isOrgPage: p === 'org', isFn: p === 'fn', isDocs: p === 'docs', isJoin: p === 'join',
+      isProject: !!project,
+
+      goHome: this.go('home'), goManifesto: this.go('manifesto'), goDfm: this.go('dfm'), goDk: this.go('dk'),
+      goEco: this.go('eco'), goOrgPage: this.go('org'), goFn: this.go('fn'), goDocs: this.go('docs'), goJoin: this.go('join'),
+
+      heroKicker: org ? 'Volunteers portal · drayker.org' : 'Open infrastructure',
+      heroTitle: org ? 'The whole world, working on the same problem.' : 'Go beyond things. Do more with less.',
+      heroBody: org
+        ? 'No hierarchy — just protocol. Take an open function, review a paper, or start your own DAO. Every contribution is modelled, peer-reviewed and permanent.'
+        : 'A volunteer, non-profit organization building Dk — a unified system of intelligence, organization and computing — and the protocol that lets the whole world build it together.',
+      heroPrimary: org ? this.go('fn') : this.go('dk'),
+      heroPrimaryLabel: org ? 'See open functions' : 'Inside the kernel',
+
+      principles: PRINCIPLES,
+      project: projectView || { kicker: '', title: '', lead: '', role: '', thesis: '', body: '', focus: [], related: [], external: [] },
+      projectHome: this.go('home'),
+      projectBackLabel: org ? 'Back to ecosystem' : 'View ecosystem',
+      projectHomeLabel: org ? 'Drayker home' : 'About Drayker',
+      projectContextNote: org
+        ? 'Project documentation for cooperation: purpose, role, relationships and public source trail.'
+        : 'Institutional overview: where this part fits in the wider Drayker architecture.',
+      projectRoleLabel: org ? 'ROLE IN THE SYSTEM' : 'WHAT IT IS',
+      projectRelationsLabel: org ? 'CONNECTED THROUGH' : 'PART OF THE SYSTEM',
+      projectIdeaLabel: org ? 'THE IDEA' : 'WHY IT MATTERS',
+      projectSourcesLabel: org ? 'SOURCES AND DOCUMENTATION' : 'RELATED SOURCES',
+      projectSourcesHint: org ? 'Public references and ways to continue the work' : 'Further reading for this part of the Drayker system',
+      projectSourcesEmpty: org
+        ? 'No public repository is linked for this part yet. The page still documents its purpose and relationships so the project can be understood independently of its private execution state.'
+        : 'No public source is linked for this part yet. This overview records where it fits in the Drayker system without presenting private project-management information as public fact.',
+      projectHasSources: projectExternalLinks.length > 0,
+      projectHasNoSources: projectExternalLinks.length === 0,
+      projectRelations,
+      projectFocus: projectView ? projectView.focus : [],
+      projectExternalLinks,
+      dkParts: DK_PARTS.map((c) => ({ ...c, onClick: this.go(c.page) })),
+      dkHeroBody: org
+        ? 'Dk Global is the strategic and technological core of Drayker: the distributed kernel that gives the ecosystem a shared architecture for intelligence, organization and computing.'
+        : 'Dk Global is the strategic and technological core of Drayker — the institutional foundation that connects distributed intelligence, organization and computing across the ecosystem.',
+      dkExpressionsKicker: org ? 'Two expressions of the kernel' : 'Dk at two scales',
+      dkExpressionsTitle: org ? 'One architecture, two contexts.' : 'The global system and the individual experience.',
+      dkExpressionsIntro: org
+        ? 'Dk Global and Dk Personal are related pages, not unrelated products. One describes the shared kernel; the other describes how that architecture can meet a person and their daily context.'
+        : 'The Drayker map distinguishes the ecosystem-wide kernel from its human-scale expression so that the institutional story remains clear while the personal connection stays visible.',
+      dkExpressions: DK_EXPRESSIONS[org ? 'org' : 'com'].map((x) => ({ ...x, onClick: this.go(x.page) })),
+      dkConnectionsTitle: org ? 'Follow the links that make cooperation possible.' : 'The parts around the kernel.',
+      dkConnectionsIntro: org
+        ? 'Use these links to move from Dk Global into the protocol, knowledge, organization, identity and personal layers that give the kernel a working context.'
+        : 'Dk Global is understood through the method, knowledge, organization, identity and personal layers that complete the Drayker overview.',
+      dkConnections: DK_CONNECTIONS[org ? 'org' : 'com'].map((x) => ({ ...x, onClick: this.go(x.page) })),
+      orgUnits: ORG_UNITS.map((u) => ({ ...u, onClick: this.go(u.page) })),
+      docs: DOCS,
+
+      ecoTitle: org ? 'Everything you can work on.' : 'The whole system, on one map.',
+      ecoLead: org
+        ? 'Every layer of Drayker has its own page: what it is for, how it relates to the rest, and the public sources you would need to continue it. Filter by layer, then open the part you want to read.'
+        : 'From the collaboration protocol to the applications built on top of it — each layer of Drayker, and where it sits in relation to the others.',
+
+      orgTitle: org ? 'Governance without an owner.' : 'A federation, not a company.',
+      orgLead: org
+        ? 'Drayker is organized by the DFMP process and its resources are governed by the non-profit DAF. The work happens on GitHub and third-party tools today — deliberately, while the experience of running distributed collaboration at scale is what the platform is being built from.'
+        : 'Drayker is a volunteer, non-profit organization. Its proposals move through the DFMP process and its resources are governed by the DAF — a federation of autonomous units rather than a company with a head office.',
+      orgDaoTitle: org ? 'Start your own DAO.' : 'How units join the federation.',
+      orgDaoBody: org
+        ? 'Anyone — a person, a team, a project or an initiative — can create a DAO and link it to the federation. Over time, DAOs accumulate federative points and voting power over federation resources and decisions.'
+        : 'Any person, team, project or initiative can form a DAO and link it to the federation. Federative points accumulate with delivered work and carry voting power over the federation’s resources and decisions.',
+      orgSteps: org
+        ? [
+          { n: '01 — PROPOSE', body: 'Present the initiative to the community through the issues.' },
+          { n: '02 — LINK', body: 'Register the DAO against the federation.' },
+          { n: '03 — ACCUMULATE', body: 'Deliver work, gain federative points, gain voting power.' }
+        ]
+        : [
+          { n: '01 — PROPOSAL', body: 'The initiative is presented to the community in the open.' },
+          { n: '02 — LINK', body: 'The unit is registered against the federation.' },
+          { n: '03 — WEIGHT', body: 'Delivered work accumulates federative points and voting power.' }
+        ],
+
+      dfmTitleTop: org ? 'A problem, cut small enough for the world to solve.' : 'The method behind everything Drayker builds.',
+      dfmLead: org
+        ? 'Distributed function modularization is the collaboration paradigm behind every Drayker project. It adapts to different domains, but the logic is always the same: model, fragment, distribute, review. If you want to contribute, this is the shape the work will arrive in.'
+        : 'Distributed function modularization is the paradigm to which Drayker’s projects and motions for resolution are built. It is what allows a problem to be modelled once and then carried by many people who never meet.',
+
+      docsTitle: org ? 'Read it before you build on it.' : 'Everything is written down.',
+      docsLead: org
+        ? 'Each part of the system publishes its own documentation site. The state of that documentation is listed honestly below — several are still summaries, and writing them is itself open work.'
+        : 'Drayker publishes its protocol, kernel, network, security, identity and organization documentation in the open, each on its own site, with the source repository behind it.',
+      docsFoot: org
+        ? 'Each repository publishes its own license and source history. A site marked as a summary is an invitation: the material to write it usually exists in the repository already.'
+        : 'Each repository publishes its own license and source history. Follow the linked documentation before reusing its material.',
+
+      dfmSteps: STEPS.map((st, i) => ({
+        n: st.n, title: st.title, tag: st.tag,
+        onClick: () => this.setState({ dfm: i }),
+        selected: i === s.dfm,
+        mark: i === s.dfm ? A : 'transparent',
+        bg: i === s.dfm ? '#111115' : 'transparent'
+      })),
+      dfmN: step.n, dfmTitle: step.title.toUpperCase(), dfmBody: step.body, dfmNote: step.note,
+      dfmDiagram: this.diagram(),
+
+      ecoFilters: ECO_FILTERS.map((f) => ({ label: f.label, selected: s.ecoF === f.id, onClick: () => this.setState({ ecoF: f.id }), ...this.chip(s.ecoF === f.id) })),
+      ecoCards: ECO.filter((c) => s.ecoF === 'all' || c.filter === s.ecoF).map((c) => ({ ...c, onClick: this.go(c.page) })),
+
+      fnFilters: FN_FILTERS.map((f) => ({ label: f.label, selected: s.fnF === f.id, onClick: () => this.setState({ fnF: f.id }), ...this.chip(s.fnF === f.id) })),
+      fnRows: fnRows,
+      fnLoading: s.fnStatus === 'loading' || s.fnStatus === 'idle',
+      fnHasRows: fnRows.length > 0,
+      fnEmpty: (s.fnStatus === 'ready' || s.fnStatus === 'error') && fnRows.length === 0,
+      fnEmptyKicker: s.fnStatus === 'error'
+        ? 'THE BOARD COULD NOT BE READ'
+        : (s.fnItems.length > 0 ? 'NOTHING UNDER THIS FILTER' : 'NO OPEN FUNCTIONS RIGHT NOW'),
+      fnEmptyBody: s.fnStatus === 'error'
+        ? 'The live list of open functions could not be read from GitHub just now — the request may have been rate-limited or blocked. The issues themselves are always readable directly in the repositories, and nothing on this board is ever filled in by hand to cover a failure.'
+        : (s.fnItems.length > 0
+          ? 'No open function currently carries this skill label. Clear the filter to see everything that is open, or look through the repositories — a function you could open yourself is often already sitting there as an undivided issue.'
+          : 'No issue currently carries the open-function label. That means the work is not fragmented yet, not that there is nothing to do: the repositories hold the papers, proposals and gaps this ecosystem is built from. Volunteering is still the fastest way in — say what you are good at and we will cut a first function with you.'),
+
+      notSent: !s.sent, sent: s.sent, sentName: s.sentName, issueUrl: s.issueUrl,
+      editAgain: () => this.setState({ sent: false }),
+      fName: s.name, fContact: s.contact, fWhy: s.why,
+      setName: (e) => this.setState({ name: e.target.value }),
+      setContact: (e) => this.setState({ contact: e.target.value }),
+      setWhy: (e) => this.setState({ why: e.target.value }),
+      skills: SKILLS.map((k) => ({
+        label: k, selected: s.skills.indexOf(k) >= 0, ...this.chip(s.skills.indexOf(k) >= 0),
+        onClick: () => this.setState((st) => ({ skills: st.skills.indexOf(k) >= 0 ? st.skills.filter((x) => x !== k) : st.skills.concat(k) }))
+      })),
+      hours: HOURS.map((h) => ({ label: h + ' h', selected: s.hours === h, ...this.chip(s.hours === h), onClick: () => this.setState({ hours: h }) })),
+      submit: this.submitApplication
+    };
+  }
+}
+</script>
+</body>
+</html>
