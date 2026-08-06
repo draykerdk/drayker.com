@@ -12,7 +12,6 @@
 <meta property="og:description" content="A volunteer, non-profit organization building Dk and the protocol behind it.">
 <meta property="og:url" content="https://drayker.com/">
 <meta name="twitter:card" content="summary">
-<meta name="robots" content="noindex, nofollow">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -1002,9 +1001,6 @@
 // a `#com/...` route arriving here is handed over to the other site.
 // ============================================================================
 const SITE = 'com';
-// Until drayker.com resolves to GitHub Pages this points at the staging URL of that
-// repository — linking to a domain that answers 404 would be worse than linking to a
-// staging address. Change to 'https://drayker.com' on the day the DNS is pointed.
 const CROSS_SITE_URL = 'https://drayker.org';
 
 const A = '#FF5500';
