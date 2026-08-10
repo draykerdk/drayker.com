@@ -1,0 +1,33 @@
+schema_version: 1
+component:
+  id: drayker.com
+  name: drayker.com
+  layer: PORTAL
+  artifact_type: portal
+  problem: Present Drayker institutionally and explain how the ecosystem architecture fits together.
+  scope:
+    - Static institutional presentation and ecosystem overview.
+    - Handoff to drayker.org for public participation.
+  non_scope:
+    - A duplicate contribution portal.
+    - Independent editing of generated site content.
+  dependencies:
+    - drayker.org
+  implementation:
+    level: operational
+    scope: The generated static institutional site is deployed at its canonical domain.
+    evidence:
+      - type: deployment
+        ref: https://drayker.com
+      - type: document
+        ref: README.md
+  risks:
+    - Editing the generated artifact directly can cause drift from the source component.
+    - Institutional language can overstate implementation if evidence boundaries are lost.
+  contributions:
+    availability: open
+    entrypoint: https://github.com/draykerdk/drayker.com/issues
+  source_of_truth:
+    repository: https://github.com/draykerdk/drayker.com
+    path: README.md
+  last_reviewed: "2026-08-10"
