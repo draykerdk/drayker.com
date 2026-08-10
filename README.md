@@ -13,21 +13,22 @@ Do not edit it by hand. It is produced from the component in [`draykerdk/drayker
 node tools/make-com.js ../drayker.com-site/index.html
 ```
 
-One component, two sites. The generator changes exactly four things — the `SITE` build constant, the cross-site link, the document head, and the staging `noindex` — so the two deployments can never drift apart. **Content for these pages is edited in `drayker.org/index.html`** (the `com*` fields of each project, and the `.com` branch of each page's copy) and regenerated here.
+One component, two sites. The generator changes exactly four things — the `SITE` build constant, the cross-site link, the document head, and the optional staging `noindex` — so the two deployments stay synchronized. **Content for these pages is edited in `drayker.org/index.html`** (the `com*` fields of each project, and the `.com` branch of each page's copy) and regenerated here.
 
 `support.js` is the generated Design Component runtime and is also copied as-is. `.nojekyll` keeps GitHub Pages from interpreting `{{ … }}` component bindings as Liquid.
 
-## Staging
+## Deployment
 
-The site is published at `draykerdk.github.io/drayker.com` and carries `<meta name="robots" content="noindex, nofollow">` until the `drayker.com` domain is pointed at GitHub Pages.
+The canonical site is live at **[drayker.com](https://drayker.com)** through GitHub Pages and the repository `CNAME`. The generated document is indexable: `STAGING = false` in `drayker.org/tools/make-com.js`, and the deployed `index.html` has no staging `noindex` directive.
 
-Going live means, in order:
+After changing institutional content in `drayker.org`:
 
-1. Point the DNS for `drayker.com` at GitHub Pages.
-2. Add a `CNAME` file containing `drayker.com` to this repository.
-3. Set `STAGING = false` in `tools/make-com.js` (in the `drayker.org` repository) and regenerate `index.html`.
-4. Change `CROSS_SITE_URL` in `drayker.org/index.html` from the staging address to `https://drayker.com`.
-5. Open `https://drayker.com` and confirm the `noindex` is gone from the served page.
+1. run the generator into this repository;
+2. run the render checks from `drayker.org` against the generated file;
+3. confirm the diff contains only intended generated changes;
+4. publish and verify the canonical domain.
+
+DNS and `www` redirects are deployment infrastructure; they should be changed only when a concrete domain route is required, not pre-created for every conceptual component.
 
 ## Running it locally
 
