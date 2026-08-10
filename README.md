@@ -2,7 +2,7 @@
 
 The institutional presentation of Drayker: what the organization is, what each part of the system does, and how the whole thing fits together.
 
-Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there — the open-functions board and the volunteer application are not duplicated here, they are handed over to the portal.
+Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there — the open-functions board and volunteer flow are not duplicated here. This site contains the institutional case for each of the twenty components/concepts and the public funding and partnership route.
 
 ## `index.html` in this repository is generated
 
@@ -13,7 +13,7 @@ Do not edit it by hand. It is produced from the component in [`draykerdk/drayker
 node tools/make-com.js ../drayker.com-site/index.html
 ```
 
-One component, two sites. The generator changes exactly four things — the `SITE` build constant, the cross-site link, the document head, and the optional staging `noindex` — so the two deployments stay synchronized. **Content for these pages is edited in `drayker.org/index.html`** (the `com*` fields of each project, and the `.com` branch of each page's copy) and regenerated here.
+One component, two sites. The generator changes the `SITE` build constant, the cross-site link and the document head; it can also add a staging `noindex` when explicitly enabled. **Content for these pages is edited in `drayker.org/index.html`** and regenerated here.
 
 `support.js` is the generated Design Component runtime and is also copied as-is. `.nojekyll` keeps GitHub Pages from interpreting `{{ … }}` component bindings as Liquid.
 
