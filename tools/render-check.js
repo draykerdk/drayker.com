@@ -81,7 +81,7 @@ const load = (site) => {
   const code = block[1]
     .replace(SITE_CONST, "const SITE = '" + site + "';")
     .replace(CROSS_CONST, "const CROSS_SITE_URL = '" + cross + "';");
-  return eval(code + '\n;({ Component, PROJECTS, CONCEPTS, JOIN_STEPS, TRACKS, LAYER_GROUPS, CASE_LAYERS, ROUTE_META, KN_NODES, KN_EDGES, KN_TRUST, KN_TODAY })');
+  return eval(code + '\n;({ Component, PROJECTS, CONCEPTS, JOIN_STEPS, TRACKS, LAYER_GROUPS, CASE_LAYERS, ROUTE_META, ECON_CHAIN, ECON_LIMITS, ECON_TODAY, ECON_QUESTIONS })');
 };
 
 const problems = [];
@@ -126,7 +126,7 @@ check(!src.includes('community review branch'), 'the retired community-review fl
 check(src.includes("template=volunteer-introduction.yml") && src.includes("template=partnership.yml"), 'the two general-forum forms are not wired');
 
 check(org.PROJECTS.length === 17, 'expected 17 curated repositories, got ' + org.PROJECTS.length);
-check(org.CONCEPTS.length === 3, 'expected 3 no-repository concepts, got ' + org.CONCEPTS.length);
+check(org.CONCEPTS.length === 7, 'expected 7 no-repository concepts, got ' + org.CONCEPTS.length);
 check(new Set(org.PROJECTS.map((p) => p.key)).size === org.PROJECTS.length, 'repository keys must be unique');
 check(org.CONCEPTS.every((p) => p.concept && !p.repo), 'every concept must explicitly have no repository');
 check(org.PROJECTS.every((p) => p.vision && p.tagline && p.layer && p.arch.length && p.contribute.length), 'every repository needs a complete page model');
@@ -134,8 +134,25 @@ check(org.CASE_LAYERS.length === 4, 'the home argument must have exactly four la
 check(org.CASE_LAYERS.map((layer) => layer.id).join(',') === 'method,system,org,transition', 'the four layers are out of order');
 check(!org.ROUTE_META.knowledge, 'the retired internal Knowledge route must not publish metadata');
 check(new Set(Object.values(org.ROUTE_META).map((meta) => meta.t)).size === Object.keys(org.ROUTE_META).length, 'route titles must be unique');
-check(org.KN_NODES.length === 6 && org.KN_EDGES.length === 7 && org.KN_TRUST.length === 5, 'the proposed knowledge model is incomplete');
-check(org.KN_TODAY.filter((row) => row.t === 't4').length === 3, 'the public inventory must expose all three open paper groups');
+// The economy page markup, sliced out so its guardrails are checked against the page
+// itself rather than against the whole document.
+const econSrc = src.slice(
+  src.indexOf('<sc-if value="{{ isEconomy }}"'),
+  src.indexOf('<sc-if value="{{ isDocs }}"')
+);
+check(econSrc.length > 2000, 'the economy page markup is missing');
+
+// Dknowledge lives on its own site: the retired page, its data tables and its state
+// were removed rather than left in the component unreachable.
+check(!src.includes('isKnowledge') && !src.includes('const KN_NODES'), 'the retired Knowledge page must not survive as dead markup or data');
+// Economy & reputation: the page that has to stay non-promissory, checked as such.
+check(org.ECON_CHAIN.length === 4 && org.ECON_LIMITS.length === 5 && org.ECON_QUESTIONS.length === 4, 'the economy page model is incomplete');
+check(org.ECON_TODAY.some((row) => row.s === 'RUNNING') && org.ECON_TODAY.some((row) => row.s === 'DESIGNED'), 'the economy page must separate what runs from what is designed');
+const econText = econSrc + JSON.stringify(org.ECON_CHAIN) + JSON.stringify(org.ECON_LIMITS)
+  + JSON.stringify(org.ECON_TODAY) + JSON.stringify(org.ECON_QUESTIONS);
+check(!/\d+(\.\d+)?\s*(euro|eur\b|usd\b|dollar|%)/i.test(econText), 'the economy page must never publish an amount or a rate');
+check(!/(worth about|valued at|per day|each day|daily amount|guaranteed income|basic income)/i.test(econText), 'the economy page must never imply a payout');
+check(org.ECON_LIMITS.some((l) => /NOT INCOME/.test(l.k)) && org.ECON_LIMITS.some((l) => /NOT AN INVESTMENT/.test(l.k)), 'the economy page must state its limits explicitly');
 check(src.includes("SITE === 'org' ? '/data/org.json' : 'https://drayker.org/data/org.json'"), 'snapshot URL must work from clean routes on both domains');
 check(propDefault === deployedSite, 'Design Component site default (' + propDefault + ') overrides deployed SITE (' + deployedSite + ')');
 make(org).setMeta('docs');
@@ -153,7 +170,7 @@ if (fs.existsSync(snapshotFile)) {
 
 for (const site of ['org', 'com']) {
   const bundle = site === 'org' ? org : com;
-  for (const page of ['home', 'manifesto', 'dfm', 'dk', 'eco', 'org', 'docs']) {
+  for (const page of ['home', 'manifesto', 'dfm', 'dk', 'eco', 'org', 'economy', 'docs']) {
     const component = make(bundle, { page });
     let values;
     try { values = component.renderVals(); }
@@ -170,18 +187,14 @@ check(orgHome.isOrgSite && !orgHome.isComSite, '.org presentation flags are wron
 check(comHome.isComSite && !comHome.isOrgSite, '.com presentation flags are wrong');
 check(orgHome.nav.some((n) => n.label === 'Contribute'), '.org navigation must expose contribution');
 check(!comHome.nav.some((n) => n.label === 'Contribute'), '.com navigation must not expose contribution');
-check(!orgHome.nav.some((n) => n.label === 'Knowledge') && !comHome.nav.some((n) => n.label === 'Knowledge'), 'Dknowledger must not have a duplicate navigation route');
-check(orgHome.nav.some((n) => n.label === 'Forum') && comHome.nav.some((n) => n.label === 'Forum'), 'both domains must link to the public forum');
-resetWindow('', 'drayker.org');
-orgHome.nav.filter((n) => n.label === 'Forum')[0].onClick();
-check(assigned[0] === 'https://forum.drayker.org/', 'Forum navigation must open the independent forum site');
-check(src.includes('href="https://dknowledger.drayker.org/"') && src.includes('Dknowledger ↗'), 'footer must link directly to the official Dknowledger site');
+check(!orgHome.nav.some((n) => n.label === 'Knowledge') && !comHome.nav.some((n) => n.label === 'Knowledge'), 'Dknowledge must not have a duplicate navigation route');
+check(src.includes('href="https://dknowledge.drayker.org/"') && src.includes('Dknowledge ↗'), 'footer must link directly to the official Dknowledge site');
 
-const dknowledgerTile = orgHome.sysLayers.flatMap((layer) => layer.parts).filter((part) => part.key === 'dknowledge')[0];
-check(dknowledgerTile && dknowledgerTile.official, 'the didactic system map must mark Dknowledger as an official external surface');
+const dknowledgeTile = orgHome.sysLayers.flatMap((layer) => layer.parts).filter((part) => part.key === 'dknowledge')[0];
+check(dknowledgeTile && dknowledgeTile.official, 'the didactic system map must mark Dknowledge as an official external surface');
 resetWindow('', 'drayker.org');
-dknowledgerTile.open();
-check(assigned[0] === 'https://dknowledger.drayker.org/', 'the didactic Dknowledger tile must open the official site');
+dknowledgeTile.open();
+check(assigned[0] === 'https://dknowledge.drayker.org/', 'the didactic Dknowledge tile must open the official site');
 
 for (const [site, bundle] of [['org', org], ['com', com]]) {
   const mobile = make(bundle, { vw: 390 }).renderVals();
@@ -229,7 +242,7 @@ for (const [hash, host] of [['#org/knowledge', 'drayker.org'], ['#org/project/dk
   resetWindow(hash, host);
   const bundle = host === 'drayker.org' ? org : com;
   make(bundle).readHash();
-  check(assigned[0] === 'https://dknowledger.drayker.org/', hash + ' must redirect to the official Dknowledger site');
+  check(assigned[0] === 'https://dknowledge.drayker.org/', hash + ' must redirect to the official Dknowledge site');
 }
 
 resetWindow('', 'drayker.com');
@@ -364,7 +377,8 @@ check(new Set(resultTracks).size === 3, 'three distinct Volunteer profiles shoul
     console.error('\n' + problems.length + ' problem(s) across ' + checks + ' checks.');
     process.exit(1);
   }
-  console.log(checks + ' static checks passed: design, .org/.com, routes, 20 project pages, Volunteer and GitHub fallback.');
+  console.log(checks + ' static checks passed: design, .org/.com, routes, '
+    + (org.PROJECTS.length + org.CONCEPTS.length - 1) + ' project pages, Volunteer and GitHub fallback.');
 })().catch((error) => {
   console.error(error.stack || error.message);
   process.exit(1);
