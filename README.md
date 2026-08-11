@@ -2,7 +2,7 @@
 
 The institutional presentation of Drayker: what the organization is, what each part of the system does, and how the whole thing fits together.
 
-Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there — the open-functions board and volunteer flow are not duplicated here. This site contains the institutional case for each of the twenty components/concepts and the public funding and partnership route.
+Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there — the open-functions board and volunteer flow are not duplicated here. This site contains the institutional case for each of the 25 public component repositories and the public funding and partnership route.
 
 ## `index.html` in this repository is generated
 
