@@ -122,11 +122,21 @@ check(src.includes('drayker-favicon.svg?v=20260811') && src.includes('sizes="any
 check(src.includes('favicon-32.png') && src.includes('favicon-16.png'), 'PNG favicon fallbacks are missing');
 check(src.includes('apple-touch-icon.png?v=20260811') && src.includes('sizes="180x180"'), 'Apple touch icon is not versioned or sized');
 check(!/FN-\d{3,}/.test(src), 'fictional open-function rows must not be published');
+
+// The mark engine is served from this domain and the twenty documentation sites load it
+// from here, but the canonical, source-preserving copy lives in the design library at
+// draykerdk/drayker-propagation, which pins this same hash in its own tools/check.js.
+// Two domains serving one engine only stays true if something says so out loud.
+const ENGINE_SHA256 = '0a421c6b10ade43a6e45e03ba1a5e7a690ea1e9cb29ebc5827321385e37c380c';
+const engineHash = require('crypto').createHash('sha256')
+  .update(fs.readFileSync(path.join(__dirname, '..', 'drayker-mark.js'))).digest('hex');
+check(engineHash === ENGINE_SHA256, 'drayker-mark.js has drifted from the canonical engine in the design library');
 check(!src.includes('community review branch'), 'the retired community-review flow is still described');
 check(src.includes("template=volunteer-introduction.yml") && src.includes("template=partnership.yml"), 'the two general-forum forms are not wired');
 
-check(org.PROJECTS.length === 17, 'expected 17 curated repositories, got ' + org.PROJECTS.length);
-check(org.CONCEPTS.length === 7, 'expected 7 no-repository concepts, got ' + org.CONCEPTS.length);
+check(org.PROJECTS.length === 25, 'expected 25 curated repositories, got ' + org.PROJECTS.length);
+check(org.CONCEPTS.length === 0, 'every part now has a repository; CONCEPTS must be empty, got ' + org.CONCEPTS.length);
+check(org.PROJECTS.every((p) => p.repo && p.site), 'every repository record needs a repo and a documentation site');
 check(new Set(org.PROJECTS.map((p) => p.key)).size === org.PROJECTS.length, 'repository keys must be unique');
 check(org.CONCEPTS.every((p) => p.concept && !p.repo), 'every concept must explicitly have no repository');
 check(org.PROJECTS.every((p) => p.vision && p.tagline && p.layer && p.arch.length && p.contribute.length), 'every repository needs a complete page model');
@@ -294,10 +304,11 @@ const result = journey.renderVals();
 check(result.jIsResult, 'journey did not reach its result');
 check(result.resProjects.length === 3, 'journey result must recommend three projects');
 check(result.resSteps.length > 0 && result.resTrackTitle, 'journey result needs a track and first steps');
-check(result.mapRows.length === 5, 'journey map must expose all system layers');
+check(result.mapRows.length === 6, 'journey map must expose all system layers');
+check(result.mapRows.some((row) => row.label === 'WHAT IT IS FOR'), 'the map must show the domains the system exists to serve');
 check(result.mapRows.filter((row) => row.you === 'YOU ARE HERE').length === 1, 'journey map must have exactly one YOU ARE HERE marker');
 check(result.mapRows.flatMap((row) => row.nodes).filter((node) => node.tag === 'YOUR TRACK').length > 0, 'journey map has no YOUR TRACK marker');
-check(result.mapRows.flatMap((row) => row.nodes).length === 17, 'journey map must contain all 17 repositories');
+check(result.mapRows.flatMap((row) => row.nodes).length === org.PROJECTS.length, 'the journey map must contain every repository');
 const volunteerUrl = decodeURIComponent(result.volUrl);
 check(volunteerUrl.includes('general-forum/issues/new?template=volunteer-introduction.yml'), 'Volunteer result points at the wrong issue template');
 check(volunteerUrl.includes('&interests=') && volunteerUrl.includes('&contribution=') && volunteerUrl.includes('&starting_point='), 'Volunteer result is missing its form fields');
@@ -368,7 +379,7 @@ check(new Set(resultTracks).size === 3, 'three distinct Volunteer profiles shoul
   await offline.loadGH(false);
   check(offline.state.ghState === 'error', 'offline GitHub request did not enter fallback state');
   const fallback = offline.renderVals();
-  check(fallback.projCards.length === 17, 'offline mode lost curated projects');
+  check(fallback.projCards.length === org.PROJECTS.length, 'offline mode lost curated projects');
   check(fallback.ghDown && fallback.liveFn.length === 0, 'offline mode must not invent open functions');
   check(fallback.fnEmptyTitle === 'GitHub is not reachable from here.', 'offline board needs the honest unavailable state');
 
