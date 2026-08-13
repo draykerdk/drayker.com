@@ -68,12 +68,12 @@ const PARTS = (() => {
 /** The head a route claims: a part route speaks for itself, others use ROUTE_META. */
 function metaFor(r) {
   const part = r.path.indexOf('project/') === 0 ? PARTS[r.path.split('/')[1]] : null;
-  if (part) return { t: part.name + ' — ' + part.tagline.replace(/\.$/, ''), d: part.vision.slice(0, 300) };
+  if (part) return { t: part.name + ' · ' + part.tagline.replace(/\.$/, ''), d: part.vision.slice(0, 300) };
   if (r.path.indexOf('contrib/') === 0) {
     const tab = r.path.split('/')[1];
     const labels = { overview: 'Overview', tracks: 'Contribution tracks', projects: 'Projects', guide: 'Contribution guide' };
     return {
-      t: (labels[tab] || tab) + ' — Contribute to Drayker',
+      t: (labels[tab] || tab) + ' · Contribute to Drayker',
       d: ROUTE_META.contrib.d + ' This page opens the ' + (labels[tab] || tab).toLowerCase() + ' view directly.'
     };
   }
@@ -206,7 +206,7 @@ function dknowledgeRedirect(pathname) {
   const target = 'https://dknowledge.drayker.org/';
   return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
     + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-    + '<title>Dknowledge — official knowledge base</title>'
+    + '<title>Dknowledge · official knowledge base</title>'
     + '<meta name="description" content="Dknowledge is Drayker’s official public knowledge base, connecting current orientation, architecture, papers, decisions and evidence to their sources.">'
     + '<link rel="canonical" href="' + target + '">'
     + '<meta name="robots" content="noindex, follow">'
@@ -219,36 +219,6 @@ function dknowledgeRedirect(pathname) {
     + '<meta http-equiv="refresh" content="0; url=' + target + '">'
     + '<script>location.replace(' + JSON.stringify(target) + ');</script>'
     + '</head><body><p>Dknowledge now has one official home. <a href="' + target + '">Continue to dknowledge.drayker.org</a>.</p></body></html>\n';
-}
-
-const LEGACY_ALIASES = SITE === 'com' ? {
-  home: {
-    target: 'https://drayker.com/',
-    title: 'Drayker | Intelligence, organization and computing',
-    description: 'The canonical institutional home of Drayker.'
-  },
-  community: {
-    target: 'https://drayker.org/',
-    title: 'Drayker Community | Volunteer and collaborate',
-    description: 'The canonical participation and volunteer portal of Drayker.'
-  },
-  'community/faq': {
-    target: 'https://drayker.org/join/',
-    title: 'Volunteer with Drayker',
-    description: 'Choose a contribution track and find a first public function.'
-  }
-} : {};
-
-function legacyRedirect(entry) {
-  return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
-    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-    + '<title>' + esc(entry.title) + '</title>'
-    + '<meta name="description" content="' + esc(entry.description) + '">'
-    + '<meta name="robots" content="noindex, follow">'
-    + '<link rel="canonical" href="' + esc(entry.target) + '">'
-    + '<meta http-equiv="refresh" content="0; url=' + esc(entry.target) + '">'
-    + '<script>location.replace(' + JSON.stringify(entry.target) + ');</script>'
-    + '</head><body><p>This address has moved. <a href="' + esc(entry.target) + '">Continue to the canonical page</a>.</p></body></html>\n';
 }
 
 const all = routes();
@@ -264,11 +234,6 @@ DKNOWLEDGE_ALIASES.forEach((pathname) => {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'index.html'), dknowledgeRedirect(pathname));
 });
-Object.entries(LEGACY_ALIASES).forEach(([pathname, entry]) => {
-  const dir = path.join(OUT, pathname);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'index.html'), legacyRedirect(entry));
-});
 fs.writeFileSync(path.join(OUT, 'sitemap.xml'), sitemap(all));
-console.log('prerendered ' + n + ' routes and ' + (DKNOWLEDGE_ALIASES.length + Object.keys(LEGACY_ALIASES).length) + ' compatibility redirects for drayker.' + SITE + ' into ' + path.resolve(OUT));
+console.log('prerendered ' + n + ' routes and ' + DKNOWLEDGE_ALIASES.length + ' compatibility redirects for drayker.' + SITE + ' into ' + path.resolve(OUT));
 console.log('sitemap.xml written with ' + all.length + ' urls');
