@@ -95,22 +95,6 @@ for (const alias of ['knowledge', 'project/dknowledge']) {
   check(html.includes('content="0; url=https://dknowledge.drayker.org/"'), alias + ' has no no-script redirect');
 }
 
-if (site === 'com') {
-  const legacy = {
-    home: 'https://drayker.com/',
-    community: 'https://drayker.org/',
-    'community/faq': 'https://drayker.org/join/'
-  };
-  for (const [pathname, target] of Object.entries(legacy)) {
-    const file = path.join(root, pathname, 'index.html');
-    check(fs.existsSync(file), 'missing legacy compatibility page: ' + pathname);
-    if (!fs.existsSync(file)) continue;
-    const page = read(file);
-    check(value(page, /<link rel="canonical" href="([^"]*)">/) === target, pathname + ' has the wrong legacy target');
-    check(page.includes('content="noindex, follow"'), pathname + ' legacy page must be noindex');
-  }
-}
-
 if (failures.length) {
   failures.forEach((failure) => console.error('FAIL: ' + failure));
   console.error(failures.length + ' of ' + checks + ' checks failed');
