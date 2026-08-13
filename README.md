@@ -10,13 +10,14 @@ Do not edit it by hand. It is produced from the component in [`draykerdk/drayker
 
 ```bash
 # in a checkout of draykerdk/drayker.org
-node tools/make-com.js ../drayker.com-site/index.html
+node tools/make-com.js ../drayker.com-site/index.html --sync
 cd ../drayker.com-site
+node tools/render-check.js
 node tools/prerender.js --site=com
 node tools/prerender-check.js --site=com
 ```
 
-One component, two sites. The generator changes the `SITE` build constant, the cross-site link and the document head. It can also add a staging `noindex` when explicitly enabled. The prerender step then emits clean, crawlable route documents with unique metadata and full favicon paths. **Content for these pages is edited in `drayker.org/index.html`** and regenerated here.
+One component, two sites. The generator changes the `SITE` build constant, the cross-site link and the document head. With `--sync` it also copies the canonical runtime, mark engine, assets and validation tools, so this checkout can be tested on its own. It can add a staging `noindex` when explicitly enabled. The prerender step then emits clean, crawlable route documents with unique metadata and full favicon paths. **Content for these pages is edited in `drayker.org/index.html`** and regenerated here.
 
 `support.js` is the generated Design Component runtime and is also copied as-is. `.nojekyll` keeps GitHub Pages from interpreting `{{ … }}` component bindings as Liquid.
 
@@ -27,7 +28,7 @@ The canonical site is live at **[drayker.com](https://drayker.com)** through Git
 After changing institutional content in `drayker.org`:
 
 1. run the generator into this repository.
-2. run the render checks from `drayker.org` against the generated file.
+2. run `node tools/render-check.js` in this repository; it must not depend on the `.org` checkout.
 3. run `tools/prerender.js --site=com` and `tools/prerender-check.js --site=com` in this repository.
 4. confirm the diff contains only intended generated changes.
 5. publish and verify the canonical domain and at least one clean subpage.

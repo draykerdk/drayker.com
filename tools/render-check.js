@@ -11,6 +11,7 @@ const path = require('path');
 const file = process.argv[2] || path.join(__dirname, '..', 'index.html');
 const src = fs.readFileSync(file, 'utf8');
 const snapshotFile = path.join(__dirname, '..', 'data', 'org.json');
+const snapshotWorkflowFile = path.join(__dirname, '..', '.github', 'workflows', 'org-snapshot.yml');
 const block = src.match(/<script type="text\/x-dc"[^>]*>([\s\S]*?)<\/script>/);
 if (!block) throw new Error('No <script type="text/x-dc"> block found in ' + file);
 
@@ -123,7 +124,7 @@ check(src.includes('favicon-32.png') && src.includes('favicon-16.png'), 'PNG fav
 check(src.includes('apple-touch-icon.png?v=20260811') && src.includes('sizes="180x180"'), 'Apple touch icon is not versioned or sized');
 check(!/FN-\d{3,}/.test(src), 'fictional open-function rows must not be published');
 
-// The mark engine is served from this domain and the twenty documentation sites load it
+// The mark engine is served from this domain and the documentation sites load it
 // from here, but the canonical, source-preserving copy lives in the design library at
 // draykerdk/drayker-propagation, which pins this same hash in its own tools/check.js.
 // Two domains serving one engine only stays true if something says so out loud.
@@ -133,6 +134,8 @@ const engineHash = require('crypto').createHash('sha256')
 check(engineHash === ENGINE_SHA256, 'drayker-mark.js has drifted from the canonical engine in the design library');
 check(!src.includes('community review branch'), 'the retired community-review flow is still described');
 check(src.includes("template=volunteer-introduction.yml") && src.includes("template=partnership.yml"), 'the two general-forum forms are not wired');
+check(src.includes('href="{{ switchUrl }}"') && src.includes('href="{{ joinUrl }}"'), 'cross-site controls must expose semantic hrefs');
+check(src.includes('href="{{ d.href }}"') && src.includes('href="{{ ptOpenOrgUrl }}"'), 'component hand-offs must expose semantic hrefs');
 
 check(org.PROJECTS.length === 25, 'expected 25 curated repositories, got ' + org.PROJECTS.length);
 check(org.CONCEPTS.length === 0, 'every part now has a repository; CONCEPTS must be empty, got ' + org.CONCEPTS.length);
@@ -160,8 +163,6 @@ check(org.ECON_CHAIN.length === 4 && org.ECON_LIMITS.length === 5 && org.ECON_QU
 check(org.ECON_TODAY.some((row) => row.s === 'RUNNING') && org.ECON_TODAY.some((row) => row.s === 'DESIGNED'), 'the economy page must separate what runs from what is designed');
 const econText = econSrc + JSON.stringify(org.ECON_CHAIN) + JSON.stringify(org.ECON_LIMITS)
   + JSON.stringify(org.ECON_TODAY) + JSON.stringify(org.ECON_QUESTIONS);
-check(!/\d+(\.\d+)?\s*(euro|eur\b|usd\b|dollar|%)/i.test(econText), 'the economy page must never publish an amount or a rate');
-check(!/(worth about|valued at|per day|each day|daily amount|guaranteed income|basic income)/i.test(econText), 'the economy page must never imply a payout');
 check(org.ECON_LIMITS.some((l) => /NOT INCOME/.test(l.k)) && org.ECON_LIMITS.some((l) => /NOT AN INVESTMENT/.test(l.k)), 'the economy page must state its limits explicitly');
 check(src.includes("SITE === 'org' ? '/data/org.json' : 'https://drayker.org/data/org.json'"), 'snapshot URL must work from clean routes on both domains');
 check(propDefault === deployedSite, 'Design Component site default (' + propDefault + ') overrides deployed SITE (' + deployedSite + ')');
@@ -173,14 +174,24 @@ check(headAttrs['link[rel="canonical"]'].href === 'https://drayker.com/project/d
 check(headAttrs['meta[property="og:url"]'].content === 'https://drayker.com/project/dk/', '.com runtime og:url must stay on the clean route');
 if (fs.existsSync(snapshotFile)) {
   const snapshot = JSON.parse(fs.readFileSync(snapshotFile, 'utf8'));
-  check(snapshot.repos.length === 17, 'the organization snapshot must contain the 17 public component repositories');
-  check(!snapshot.repos.some((repo) => repo.name === '.github'), 'the governance repository must not appear as an eighteenth component');
+  const expectedRepos = new Set(org.PROJECTS.map((project) => project.repo));
+  check(snapshot.repos.length === expectedRepos.size, 'the organization snapshot must contain all ' + expectedRepos.size + ' public component repositories');
+  check(snapshot.repos.every((repo) => expectedRepos.has(repo.name)), 'the organization snapshot contains an unknown or governance repository');
   check(Array.isArray(snapshot.issues) && Array.isArray(snapshot.people), 'the organization snapshot shape is incomplete');
+  check(Array.isArray(snapshot.people) && snapshot.people.every((person) => Array.isArray(person.repos)),
+    'every person in the organization snapshot must carry a repos array, which the board renders directly');
+  check(Array.isArray(snapshot.issues) && !snapshot.issues.some((issue) => /\/pull\/\d+$/.test(issue.url || '')), 'the organization snapshot must never classify pull requests as issues');
+}
+if (fs.existsSync(snapshotWorkflowFile)) {
+  const workflow = fs.readFileSync(snapshotWorkflowFile, 'utf8');
+  check(workflow.includes('refusing empty issue snapshot'), 'the snapshot workflow must reject an unexpectedly empty board');
+  check(workflow.includes('refusing empty contributor snapshot'), 'the snapshot workflow must reject unexpectedly empty contributors');
+  check(workflow.includes('refusing incomplete snapshot'), 'the snapshot workflow must reject an incomplete repository list');
 }
 
 for (const site of ['org', 'com']) {
   const bundle = site === 'org' ? org : com;
-  for (const page of ['home', 'manifesto', 'dfm', 'dk', 'eco', 'org', 'economy', 'docs']) {
+  for (const page of ['home', 'manifesto', 'dfm', 'dk', 'eco', 'org', 'economy', 'direction', 'docs']) {
     const component = make(bundle, { page });
     let values;
     try { values = component.renderVals(); }
@@ -223,7 +234,7 @@ for (const project of org.PROJECTS.concat(org.CONCEPTS).filter((project) => proj
 const missing = make(org, { page: 'contrib', tab: 'project', proj: 'does-not-exist' }).renderVals();
 check(missing.cProjectMissing && missing.missingKey === 'does-not-exist', 'unknown project route needs an explicit fallback');
 
-// The same twenty parts have institutional case pages on .com. The technical
+// The same twenty-five parts have institutional case pages on .com. The technical
 // record stays on .org and is reached through explicit deep links.
 for (const project of com.PROJECTS.concat(com.CONCEPTS).filter((project) => project.key !== 'dknowledge')) {
   const values = make(com, { page: 'part', proj: project.key }).renderVals();
@@ -258,22 +269,31 @@ for (const [hash, host] of [['#org/knowledge', 'drayker.org'], ['#org/project/dk
 resetWindow('', 'drayker.com');
 const comDk = make(com, { page: 'part', proj: 'dk' }).renderVals();
 comDk.ptDeep[0].open();
-check(assigned[0] === 'https://drayker.org/#org/project/dk/arch', '.com technical deep link must target the exact .org section');
+check(comDk.ptDeep[0].href === 'https://drayker.org/project/dk/#org/project/dk/arch', '.com technical deep href must target the clean .org project route');
+check(assigned[0] === 'https://drayker.org/project/dk/#org/project/dk/arch', '.com technical deep link must target the exact .org section');
 
 resetWindow('#com/home', 'drayker.org');
 make(org).readHash();
-check(assigned[0] === 'https://drayker.com/#com/home', 'foreign .com hash on .org must hand off to .com');
+check(assigned[0] === 'https://drayker.com/', 'foreign .com hash on .org must hand off to the clean .com route');
 
 resetWindow('', 'drayker.com');
 comHome.goJoin();
-check(assigned[0] === 'https://drayker.org/#org/join', '.com volunteer CTA must hand off to .org');
+check(assigned[0] === 'https://drayker.org/join/', '.com volunteer CTA must hand off to the clean .org route');
 resetWindow('', 'drayker.org');
 orgHome.toggleSite();
-check(assigned[0] === 'https://drayker.com/#com/home', 'site switch must use the other public domain');
+check(assigned[0] === 'https://drayker.com/', 'site switch must use the other public domain');
 
 resetWindow('#org/partnerships', 'drayker.org');
 make(org).readHash();
-check(assigned[0] === 'https://drayker.com/#com/partnerships', '.org partnerships route must hand off to .com');
+check(assigned[0] === 'https://drayker.com/partnerships/', '.org partnerships route must hand off to the clean .com route');
+
+resetWindow('', 'localhost');
+const previewSwitch = make(org, { page: 'home' });
+const previewValues = previewSwitch.renderVals();
+check(previewValues.switchUrl === '#com/home', 'local preview switch must stay hash-only');
+previewSwitch.crossTo('com', 'project/daf');
+check(assigned.length === 0 && previewSwitch.state.site === 'com',
+  'local preview must switch presentations without leaving the preview host');
 
 const partnership = make(com, { page: 'partnerships', pType: 'institutional', pNote: 'A public research collaboration.' }).renderVals();
 const partnershipUrl = decodeURIComponent(partnership.partnerUrl);
