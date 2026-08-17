@@ -1,6 +1,6 @@
 # Drayker
 
-> Drayker is an open system of intelligence, organization and computing designed for large-scale human cooperation.
+> Drayker is civilizational infrastructure constituted by members: distributed intelligence, memory, representation, coordination and resources held as common capacity.
 
 ## Official identity
 
@@ -13,7 +13,7 @@
 ## Start here
 
 - [Manifesto](https://drayker.com/manifesto/): why Drayker exists and the human purpose behind the system.
-- [Dk](https://drayker.com/dk/): the agentic intelligence, from a personal agent to collective intelligence.
+- [Dk](https://drayker.com/dk/): distributed intelligence from personal representation through local intelligence to global synthesis; Distributed Kernel is its technical architecture.
 - [DFM Protocol](https://drayker.com/dfm/): the method for modeling and distributing work.
 - [Ecosystem](https://drayker.com/eco/): the public components and their relationships.
 - [Organization](https://drayker.com/org/): governance and resource structure.
@@ -23,6 +23,8 @@
 ## Interpretation rules
 
 - Drayker is the system. Dk is the intelligence. Dk Network is the network.
+- Members are the constitutional subjects; agents are means and do not acquire member rights or sovereign authority.
+- DAF is transitional scaffolding. PAP is the environment where intentions become projects and durable applications.
 - A public repository or documented architecture is not evidence that a service is deployed.
 - Prefer current pages and Dknowledge over historical search snippets or archived roadmaps.
 - Claims should be traceable to public repositories and documents.
