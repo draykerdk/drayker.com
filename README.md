@@ -1,8 +1,8 @@
 # drayker.com. Drayker institutional site
 
-The institutional presentation of Drayker: what the organization is, what each part of the system does, and how the whole thing fits together.
+The institutional presentation of Drayker's civilizational thesis: infrastructure constituted by members, Dk as distributed intelligence, Dknowledge as distributed memory, PAP as the project environment, and how the whole ecosystem fits together.
 
-Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there. The open-functions board and volunteer flow are not duplicated here. This site contains the institutional case for each of the 25 public component repositories and the public funding and partnership route.
+Companion to **[drayker.org](https://drayker.org)**, the participation and constitution portal. The founding contribution path lives there and is not duplicated here. This site contains the institutional case for each of the 25 public component repositories and the public funding and partnership route.
 
 ## `index.html` in this repository is generated
 

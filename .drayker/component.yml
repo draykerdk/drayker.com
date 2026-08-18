@@ -4,7 +4,7 @@ component:
   name: drayker.com
   layer: PORTAL
   artifact_type: portal
-  problem: Present Drayker institutionally and explain how the ecosystem architecture fits together.
+  problem: Present Drayker's civilizational thesis and explain how its member constitution, distributed intelligence, memory, project environment and ecosystem fit together.
   scope:
     - Static institutional presentation and ecosystem overview.
     - Handoff to drayker.org for public participation.
@@ -30,4 +30,4 @@ component:
   source_of_truth:
     repository: https://github.com/draykerdk/drayker.com
     path: README.md
-  last_reviewed: "2026-08-10"
+  last_reviewed: "2026-08-17"
