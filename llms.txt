@@ -1,6 +1,6 @@
 # Drayker
 
-> Drayker is an open system of intelligence, organization and computing designed for large-scale human cooperation.
+> The institutional site explains the purpose of Drayker, the roles of its components and the relationships between people, intelligence, knowledge and shared resources.
 
 ## Official identity
 
