@@ -1,6 +1,6 @@
 # drayker.com. Drayker institutional site
 
-The institutional presentation of Drayker: what the organization is, what each part of the system does, and how the whole thing fits together.
+The institutional presentation of Drayker: what the supersystem is, what each part of the system does, and how the whole thing fits together.
 
 Companion to **[drayker.org](https://drayker.org)**, the volunteers portal. Participation lives there. The open-functions board and volunteer flow are not duplicated here. This site contains the institutional case for each of the 25 public component repositories and the public funding and partnership route.
 
@@ -41,4 +41,4 @@ DNS and `www` redirects are deployment infrastructure. They should be changed on
 python3 -m http.server 8767
 ```
 
-Site content is published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The code is under the license in `LICENSE`.
+Code under MIT (see `LICENSE`), content under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
