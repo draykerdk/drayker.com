@@ -10,8 +10,8 @@ Do not edit it by hand. It is produced from the component in [`draykerdk/drayker
 
 ```bash
 # in a checkout of draykerdk/drayker.org
-node tools/make-com.js ../drayker.com-site/index.html --sync
-cd ../drayker.com-site
+node tools/make-com.js ../drayker.com/index.html --sync
+cd ../drayker.com
 node tools/render-check.js
 node tools/prerender.js --site=com
 node tools/prerender-check.js --site=com
